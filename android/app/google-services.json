@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "735999702577",
+    "project_id": "thermoconfort-9df37",
+    "storage_bucket": "thermoconfort-9df37.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:735999702577:android:c104eb1f4614908d9f0710",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAW5wcsv8KSEVxQOWwkvqHlXxdB719tPFU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
