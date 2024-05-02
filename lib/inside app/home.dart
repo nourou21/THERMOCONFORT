@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_2/screens/login_screen/login_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_application_2/auth/loginscreen.dart';
 import 'package:firebase_database/firebase_database.dart';
 
 class homescreen extends StatefulWidget {
@@ -22,7 +22,7 @@ class _homescreenState extends State<homescreen> {
       await FirebaseAuth.instance.signOut();
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => LoginScreen()),
+        MaterialPageRoute(builder: (context) => LOGINN()),
       );
     } catch (e) {
       print('Error signing out: $e');

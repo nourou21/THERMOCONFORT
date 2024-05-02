@@ -46,6 +46,7 @@ dependencies:
   shared_preferences: ^2.2.3
   permission_handler: ^11.3.1
   geolocator: ^11.0.0
+  ionicons: ^0.2.2
 
 dev_dependencies:
   flutter_test:
