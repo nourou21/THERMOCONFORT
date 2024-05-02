@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:validators/validators.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ForgetPasswordPage extends StatefulWidget {
   const ForgetPasswordPage({Key? key}) : super(key: key);
@@ -21,6 +22,23 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
 
   bool isEmailCorrect = false;
   final _formKey = GlobalKey<FormState>();
+
+  Future<void> _resetPassword() async {
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(
+        email: _emailTextEditingController.text,
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Reset Password Email Sent')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('An error occurred. Please try again later.')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -137,10 +155,7 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
                           ),
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text('Reset Password Email Sent')),
-                              );
+                              _resetPassword();
                             }
                           },
                           child: Text(
