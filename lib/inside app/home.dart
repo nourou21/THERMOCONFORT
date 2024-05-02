@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_2/auth/loginscreen.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class homescreen extends StatefulWidget {
   const homescreen({Key? key}) : super(key: key);
@@ -13,6 +14,9 @@ class homescreen extends StatefulWidget {
 class _homescreenState extends State<homescreen> {
   bool isEmailCorrect = false;
 
+  final DatabaseReference _ledReference =
+      FirebaseDatabase.instance.reference().child('project/led');
+
   void disconnect() async {
     try {
       await FirebaseAuth.instance.signOut();
@@ -23,6 +27,14 @@ class _homescreenState extends State<homescreen> {
     } catch (e) {
       print('Error signing out: $e');
     }
+  }
+
+  void turnOn() {
+    _ledReference.set('on');
+  }
+
+  void turnOff() {
+    _ledReference.set('off');
   }
 
   @override
@@ -61,16 +73,27 @@ class _homescreenState extends State<homescreen> {
           ),
         ),
       ),
-      floatingActionButton: Positioned(
-        bottom: 20.0,
-        left: 20.0,
-        child: ElevatedButton(
-          onPressed: disconnect,
-          child: Text('Sign Out'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.red,
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            onPressed: turnOn,
+            tooltip: 'Turn On',
+            child: Icon(Icons.power_settings_new),
           ),
-        ),
+          SizedBox(height: 16.0),
+          FloatingActionButton(
+            onPressed: turnOff,
+            tooltip: 'Turn Off',
+            child: Icon(Icons.power_settings_new),
+          ),
+          SizedBox(height: 16.0),
+          FloatingActionButton(
+            onPressed: disconnect,
+            tooltip: 'Sign Out',
+            child: Icon(Icons.logout),
+          ),
+        ],
       ),
     );
   }

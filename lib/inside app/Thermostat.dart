@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
@@ -19,13 +20,15 @@ class _ThermostatPageState extends State<ThermostatPage>
   late Animation<Color?> _animation;
 
   String thermostatName = 'Thermoconfort';
-  double temperature = 20.0;
-  int readTemp = 0; // Change type to int
+  int readTemp =
+      0; // Updated to hold the temperature value fetched from the database
   bool handButtonPressed = false;
   bool isDarkMode = false;
   Color backgroundColor = Colors.white;
 
   final databaseReference = FirebaseDatabase.instance.reference();
+
+  late StreamSubscription temperatureSubscription;
 
   @override
   void initState() {
@@ -40,20 +43,19 @@ class _ThermostatPageState extends State<ThermostatPage>
     ).animate(_controller);
     _controller.forward();
 
-    // Call the method to listen to temperature changes
-    listenToTemperatureChanges();
+    // Listen for temperature changes
+    listenToTemperatureChanges(); // Call the new function to start listening for temperature changes
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    temperatureSubscription
+        .cancel(); // Cancel the subscription to avoid memory leaks
     super.dispose();
   }
 
-  void sendVacationModeToDatabase(bool isVacationMode) {
-    databaseReference.child('project/vacation_mode').set(isVacationMode);
-  }
-
+  // New function to listen for temperature changes in the database
   void listenToTemperatureChanges() {
     databaseReference.child('project/read_temp').onValue.listen((event) {
       // Retrieve the temperature value from the database
@@ -68,18 +70,20 @@ class _ThermostatPageState extends State<ThermostatPage>
     });
   }
 
+  void sendVacationModeToDatabase(bool isVacationMode) {
+    databaseReference.child('project/vacation_mode').set(isVacationMode);
+  }
+
   void incrementTemperature() {
     setState(() {
-      temperature += 1.0;
+      readTemp += 1; // Increment readTemp instead of temperature
     });
-    sendTemperatureToDatabase(temperature);
   }
 
   void decrementTemperature() {
     setState(() {
-      temperature -= 1.0;
+      readTemp -= 1; // Decrement readTemp instead of temperature
     });
-    sendTemperatureToDatabase(temperature);
   }
 
   void openGraphPage() {
@@ -87,10 +91,6 @@ class _ThermostatPageState extends State<ThermostatPage>
       context,
       MaterialPageRoute(builder: (context) => GraphPage()),
     );
-  }
-
-  void sendTemperatureToDatabase(double temperature) {
-    databaseReference.child('project/temperature').set(temperature);
   }
 
   void changeThermostatName() async {
@@ -164,8 +164,8 @@ class _ThermostatPageState extends State<ThermostatPage>
       var data = jsonDecode(response.body);
       double temp = data['main']['temp'];
       setState(() {
-        temperature =
-            temp - 273.15; // Convert temperature from Kelvin to Celsius
+        readTemp = (temp - 273.15)
+            as int; // Convert temperature from Kelvin to Celsius and assign to readTemp
       });
     }
   }
@@ -205,14 +205,61 @@ class _ThermostatPageState extends State<ThermostatPage>
       return;
     }
 
-    // If GPS is enabled, show location information
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-    displayLocationInformation(position);
+    // If GPS is enabled, request location permission
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      // Show popup to request location permission
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Location Permission'),
+            content: Text(
+                'This app requires access to your location. Please grant permission in settings.'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  // Open app settings to grant location permission
+                  Geolocator.openAppSettings();
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+      return;
+    }
+
+    // If location permission is granted, show location information
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+      displayLocationInformation(position);
+    } catch (e) {
+      // Show error popup
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Error'),
+            content: Text('Error fetching location: $e'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 
   void displayLocationInformation(Position position) async {
-    // Call the method to fetch weather information
     await fetchWeatherInformation(position);
 
     showDialog(
@@ -226,7 +273,7 @@ class _ThermostatPageState extends State<ThermostatPage>
             children: [
               Text('Latitude: ${position.latitude}'),
               Text('Longitude: ${position.longitude}'),
-              Text('Weather Temperature: ${temperature.toStringAsFixed(2)}°C'),
+              Text('Weather Temperature: ${readTemp.toStringAsFixed(2)}°C'),
             ],
           ),
           actions: <Widget>[
@@ -289,7 +336,7 @@ class _ThermostatPageState extends State<ThermostatPage>
                 Row(
                   children: [
                     SizedBox(
-                      width: 6,
+                      width: 30,
                     ),
                     GestureDetector(
                       onTap: () {
@@ -374,7 +421,7 @@ class _ThermostatPageState extends State<ThermostatPage>
             ),
             SizedBox(height: 20.0),
             Text(
-              '$temperature°C',
+              '$readTemp°C', // Display readTemp instead of temperature
               style: TextStyle(
                 fontSize: 35.0,
                 color: Color(0xFFB97A57),
@@ -399,7 +446,6 @@ class _ThermostatPageState extends State<ThermostatPage>
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 20.0),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
@@ -414,6 +460,23 @@ class _ThermostatPageState extends State<ThermostatPage>
                 SizedBox(width: 16.0),
                 SizedBox(width: 16.0),
               ],
+            ),
+            SizedBox(height: 20.0),
+            ElevatedButton(
+              onPressed: () async {
+                print("Button Pressed");
+                // Get the current position
+                try {
+                  Position position = await Geolocator.getCurrentPosition(
+                      desiredAccuracy: LocationAccuracy.high);
+                  print("Position: $position");
+                  // Display location information
+                  displayLocationInformation(position);
+                } catch (e) {
+                  print("Error getting position: $e");
+                }
+              },
+              child: Text('Show Latitude and Temperature'),
             ),
           ],
         ),
