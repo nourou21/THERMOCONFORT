@@ -1,5 +1,6 @@
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
-
+import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_2/auth/loginscreen.dart';
 
@@ -8,12 +9,36 @@ class ThermostatPage extends StatefulWidget {
   _ThermostatPageState createState() => _ThermostatPageState();
 }
 
-class _ThermostatPageState extends State<ThermostatPage> {
+class _ThermostatPageState extends State<ThermostatPage>
+    with SingleTickerProviderStateMixin {
+  // Add SingleTickerProviderStateMixin
+  late AnimationController _controller; // Animation controller
+  late Animation<Color?> _animation; // Animation for text
+
   String thermostatName = 'Thermoconfort';
   double temperature = 20.0;
   bool handButtonPressed = false;
   bool isDarkMode = false;
   Color backgroundColor = Colors.white;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 1500), // Duration of the animation
+    );
+    _animation = ColorTween(
+            begin: Colors.black, end: Colors.blue) // Color transition animation
+        .animate(_controller); // Assign animation to controller
+    _controller.forward(); // Start the animation
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose(); // Dispose the animation controller
+    super.dispose();
+  }
 
   void toggleDarkMode() {
     setState(() {
@@ -102,36 +127,60 @@ class _ThermostatPageState extends State<ThermostatPage> {
   void disconnect() async {
     try {
       await FirebaseAuth.instance.signOut();
-      // After signing out, you might want to navigate to the login screen
-      // You can replace the current page with the login screen using Navigator
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => LoginScreen()),
       );
     } catch (e) {
       print('Error signing out: $e');
-      // Handle sign out error if any
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(thermostatName),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.exit_to_app),
-            onPressed: disconnect,
-          ),
-        ],
-      ),
       body: Container(
         color: backgroundColor,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            SizedBox(height: 20.0),
+            SizedBox(
+              height: 33,
+            ),
+            Row(
+              children: [
+                SizedBox(
+                  width: 340,
+                ),
+                IconButton(
+                  icon: Icon(Icons.exit_to_app),
+                  onPressed: disconnect,
+                ),
+              ],
+            ),
+            DefaultTextStyle(
+              style: TextStyle(
+                color: _animation.value, // Apply color animation to text
+              ),
+              child: SizedBox(
+                height: 120.0,
+                child: TyperAnimatedTextKit(
+                  // Animated text widget
+                  text: [thermostatName], // Text to animate
+                  textStyle: GoogleFonts.indieFlower(
+                    textStyle: TextStyle(
+                      color: Colors.black.withOpacity(0.5),
+                      fontWeight: FontWeight.w300,
+                      fontSize: 40,
+                    ),
+                  ),
+                  textAlign: TextAlign.start,
+                  // Remove the alignment parameter
+                  isRepeatingAnimation: false, // Animation repetition
+                  speed: Duration(milliseconds: 200), // Animation speed
+                ),
+              ),
+            ),
+            SizedBox(height: 60.0),
             GestureDetector(
               onTap: incrementTemperature,
               child: Image.asset(
@@ -278,23 +327,6 @@ class GraphPage extends StatelessWidget {
           child: Text('Placeholder pour le graphique'),
         ),
       ),
-    );
-  }
-}
-
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Thermostat App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: ThermostatPage(),
     );
   }
 }

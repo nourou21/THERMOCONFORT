@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_2/inside%20app/slider.dart';
 import 'package:lottie/lottie.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:validators/validators.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_2/auth/signup.dart';
 import 'package:flutter_application_2/auth/forgetpass.dart';
-import 'package:flutter_application_2/Thermostat.dart'; // Assuming this is the correct import for ThermostatPage
+import 'package:flutter_application_2/inside%20app/Thermostat.dart'; // Assuming this is the correct import for ThermostatPage
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -42,7 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (userCredential.user != null) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => ThermostatPage()),
+          MaterialPageRoute(builder: (context) => SliderPage()),
         );
       }
 

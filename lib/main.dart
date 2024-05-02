@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_2/Thermostat.dart';
+import 'package:flutter_application_2/inside%20app/Thermostat.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_application_2/auth/loginscreen.dart';
 
