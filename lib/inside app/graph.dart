@@ -29,6 +29,7 @@ class GraphPage extends StatelessWidget {
                 ),
                 IconButton(
                   onPressed: () {
+                    // Pop the current screen when the user clicks on the back button
                     Navigator.pop(context);
                   },
                   icon: Icon(Icons.arrow_back),
@@ -65,6 +66,7 @@ class GraphPage extends StatelessWidget {
                 ),
               ],
             ),
+            SizedBox(height: 20),
           ],
         ),
       ),

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_2/inside%20app/slider.dart';
 import 'package:lottie/lottie.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:validators/validators.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_2/auth/signup.dart';
 import 'package:flutter_application_2/auth/forgetpass.dart';
+import 'package:flutter_application_2/inside app/slider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -16,13 +17,13 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   TextEditingController _emailTextEditingController = TextEditingController();
-  TextEditingController _passwordTextEditingController =
-      TextEditingController();
+  TextEditingController _passwordTextEditingController = TextEditingController();
+  bool _keepLoggedIn = false; // Add this variable to track the checkbox state
 
   @override
   void dispose() {
-    _emailTextEditingController.clear();
-    _passwordTextEditingController.clear();
+    _emailTextEditingController.dispose();
+    _passwordTextEditingController.dispose();
     super.dispose();
   }
 
@@ -38,24 +39,19 @@ class _LoginScreenState extends State<LoginScreen> {
         password: _passwordTextEditingController.text,
       );
 
-      // If login is successful, navigate to ThermostatPage
+      if (_keepLoggedIn) {
+        // Store the user's login state locally if "Keep me logged in" is checked
+        await _storeLoginStateLocally();
+      }
+
       if (userCredential.user != null) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => SliderPage()),
         );
       }
-
-      // Handle successful login, navigate to the next screen, etc.
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        _showErrorDialog('No user found for that email.');
-      } else if (e.code == 'wrong-password') {
-        _showErrorDialog('Wrong password provided for that user.');
-      } else {
-        _showErrorDialog('Error: ${e.message}');
-      }
-      // Handle other exceptions
+    } catch (e) {
+      _showErrorDialog('Failed to sign in');
     }
   }
 
@@ -77,6 +73,29 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       },
     );
+  }
+
+  Future<void> _storeLoginStateLocally() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', true);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+    if (isLoggedIn) {
+      // Navigate to home screen if already logged in
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => SliderPage()),
+      );
+    }
   }
 
   @override
@@ -212,8 +231,22 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                         ),
-                        SizedBox(
-                          height: 20,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Checkbox(
+                              value: _keepLoggedIn,
+                              onChanged: (value) {
+                                setState(() {
+                                  _keepLoggedIn = value!;
+                                });
+                              },
+                            ),
+                            Text(
+                              'Keep me logged in',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ],
                         ),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
@@ -239,6 +272,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
                   ),
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -300,6 +334,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ],
                   ),
+                  // Add Checkbox to allow the user to indicate whether to keep logged in
                 ],
               ),
             ),
