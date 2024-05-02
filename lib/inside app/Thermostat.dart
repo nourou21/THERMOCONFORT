@@ -181,10 +181,58 @@ class _ThermostatPageState extends State<ThermostatPage>
       return;
     }
 
-    // If GPS is enabled, show location information
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-    displayLocationInformation(position);
+    // If GPS is enabled, request location permission
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      // Show popup to request location permission
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Location Permission'),
+            content: Text(
+                'This app requires access to your location. Please grant permission in settings.'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  // Open app settings to grant location permission
+                  Geolocator.openAppSettings();
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+      return;
+    }
+
+    // If location permission is granted, show location information
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+      displayLocationInformation(position);
+    } catch (e) {
+      // Show error popup
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Error'),
+            content: Text('Error fetching location: $e'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 
   void displayLocationInformation(Position position) async {
@@ -380,6 +428,23 @@ class _ThermostatPageState extends State<ThermostatPage>
                 SizedBox(width: 16.0),
                 SizedBox(width: 16.0),
               ],
+            ),
+            SizedBox(height: 20.0),
+            ElevatedButton(
+              onPressed: () async {
+                print("Button Pressed");
+                // Get the current position
+                try {
+                  Position position = await Geolocator.getCurrentPosition(
+                      desiredAccuracy: LocationAccuracy.high);
+                  print("Position: $position");
+                  // Display location information
+                  displayLocationInformation(position);
+                } catch (e) {
+                  print("Error getting position: $e");
+                }
+              },
+              child: Text('Show Latitude and Temperature'),
             ),
           ],
         ),
