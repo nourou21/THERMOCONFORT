@@ -1,8 +1,7 @@
-import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_application_2/auth/loginscreen.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class ThermostatPage extends StatefulWidget {
   @override
@@ -11,9 +10,8 @@ class ThermostatPage extends StatefulWidget {
 
 class _ThermostatPageState extends State<ThermostatPage>
     with SingleTickerProviderStateMixin {
-  // Add SingleTickerProviderStateMixin
-  late AnimationController _controller; // Animation controller
-  late Animation<Color?> _animation; // Animation for text
+  late AnimationController _controller;
+  late Animation<Color?> _animation;
 
   String thermostatName = 'Thermoconfort';
   double temperature = 20.0;
@@ -21,22 +19,25 @@ class _ThermostatPageState extends State<ThermostatPage>
   bool isDarkMode = false;
   Color backgroundColor = Colors.white;
 
+  final databaseReference = FirebaseDatabase.instance.reference();
+
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 1500), // Duration of the animation
+      duration: Duration(milliseconds: 1500),
     );
     _animation = ColorTween(
-            begin: Colors.black, end: Colors.blue) // Color transition animation
-        .animate(_controller); // Assign animation to controller
-    _controller.forward(); // Start the animation
+      begin: Colors.black,
+      end: Colors.blue,
+    ).animate(_controller);
+    _controller.forward();
   }
 
   @override
   void dispose() {
-    _controller.dispose(); // Dispose the animation controller
+    _controller.dispose();
     super.dispose();
   }
 
@@ -53,17 +54,17 @@ class _ThermostatPageState extends State<ThermostatPage>
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Changer le nom du thermostat'),
+          title: Text('Change Thermostat Name'),
           content: TextField(
             controller: controller,
-            decoration: InputDecoration(hintText: 'Nouveau nom'),
+            decoration: InputDecoration(hintText: 'New Name'),
           ),
           actions: <Widget>[
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text('Annuler'),
+              child: Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
@@ -85,7 +86,7 @@ class _ThermostatPageState extends State<ThermostatPage>
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Choisir une couleur de fond'),
+          title: Text('Choose Background Color'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
@@ -103,12 +104,14 @@ class _ThermostatPageState extends State<ThermostatPage>
     setState(() {
       temperature += 1.0;
     });
+    sendTemperatureToDatabase(temperature);
   }
 
   void decrementTemperature() {
     setState(() {
       temperature -= 1.0;
     });
+    sendTemperatureToDatabase(temperature);
   }
 
   void toggleHandButton() {
@@ -124,48 +127,36 @@ class _ThermostatPageState extends State<ThermostatPage>
     );
   }
 
-  void disconnect() async {
-    try {
-      await FirebaseAuth.instance.signOut();
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LoginScreen()),
-      );
-    } catch (e) {
-      print('Error signing out: $e');
-    }
+  void sendTemperatureToDatabase(double temperature) {
+    databaseReference.child('project/temperature').set(temperature);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        color: backgroundColor,
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: NetworkImage(
+              'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSx7IBkCtYd6ulSfLfDL-aSF3rv6UfmWYxbSE823q36sPiQNVFFLatTFdGeUSnmJ4tUzlo&usqp=CAU',
+            ),
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(Colors.black, BlendMode.dstATop),
+          ),
+        ),
         child: Column(
           children: <Widget>[
             SizedBox(
-              height: 33,
-            ),
-            Row(
-              children: [
-                SizedBox(
-                  width: 340,
-                ),
-                IconButton(
-                  icon: Icon(Icons.exit_to_app),
-                  onPressed: disconnect,
-                ),
-              ],
+              height: 70,
             ),
             DefaultTextStyle(
               style: TextStyle(
-                color: _animation.value, // Apply color animation to text
+                color: _animation.value,
               ),
               child: SizedBox(
                 height: 120.0,
                 child: TyperAnimatedTextKit(
-                  // Animated text widget
-                  text: [thermostatName], // Text to animate
+                  text: [thermostatName],
                   textStyle: GoogleFonts.indieFlower(
                     textStyle: TextStyle(
                       color: Colors.black.withOpacity(0.5),
@@ -174,9 +165,8 @@ class _ThermostatPageState extends State<ThermostatPage>
                     ),
                   ),
                   textAlign: TextAlign.start,
-                  // Remove the alignment parameter
-                  isRepeatingAnimation: false, // Animation repetition
-                  speed: Duration(milliseconds: 200), // Animation speed
+                  isRepeatingAnimation: false,
+                  speed: Duration(milliseconds: 200),
                 ),
               ),
             ),
@@ -231,12 +221,26 @@ class _ThermostatPageState extends State<ThermostatPage>
                 SizedBox(width: 16.0),
                 GestureDetector(
                   onTap: () {
-                    toggleHandButton();
+                    setState(() {
+                      handButtonPressed = !handButtonPressed;
+                    });
                   },
-                  child: Image.asset(
-                    'assets/HAND.png',
+                  child: AnimatedContainer(
+                    duration: Duration(milliseconds: 300),
                     width: 48.0,
                     height: 48.0,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8.0),
+                      color:
+                          handButtonPressed ? Colors.blue : Colors.transparent,
+                    ),
+                    padding: EdgeInsets.all(12.0),
+                    child: Image.asset(
+                      'assets/HAND.png',
+                      width: 24.0,
+                      height: 24.0,
+                      color: handButtonPressed ? Colors.white : Colors.black,
+                    ),
                   ),
                 ),
                 SizedBox(width: 16.0),
@@ -245,35 +249,35 @@ class _ThermostatPageState extends State<ThermostatPage>
                     showDialog(
                       context: context,
                       builder: (_) => AlertDialog(
-                        title: Text('Fonctionnalités de PARA'),
+                        title: Text('PARA Features'),
                         content: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             ElevatedButton(
                               onPressed: changeBackgroundColor,
-                              child: Text('Changer de couleur'),
+                              child: Text('Change Background Color'),
                             ),
                             ElevatedButton(
                               onPressed: changeThermostatName,
-                              child: Text('Changer le nom du thermostat'),
+                              child: Text('Change Thermostat Name'),
                             ),
                             ElevatedButton(
                               onPressed: () {},
                               child: Text(
-                                'Désactiver ou activer les notifications',
+                                'Toggle Notifications',
                               ),
                             ),
                             ElevatedButton(
                               onPressed: toggleDarkMode,
-                              child: Text('Mode sombre ou clair'),
+                              child: Text('Toggle Dark Mode'),
                             ),
                             ElevatedButton(
                               onPressed: () {},
-                              child: Text('Configurer le langage'),
+                              child: Text('Configure Language'),
                             ),
                             ElevatedButton(
                               onPressed: () {},
-                              child: Text("Demander l'activation du GPS"),
+                              child: Text("Request GPS Activation"),
                             ),
                           ],
                         ),
@@ -295,16 +299,16 @@ class _ThermostatPageState extends State<ThermostatPage>
                 children: <Widget>[
                   ElevatedButton(
                     onPressed: () {
-                      print('Mode Vacances');
+                      print('Vacation Mode');
                     },
-                    child: Text('Mode Vacances'),
+                    child: Text('Vacation Mode'),
                   ),
                   SizedBox(width: 16.0),
                   ElevatedButton(
                     onPressed: () {
-                      print('Mode Nuit');
+                      print('Night Mode');
                     },
-                    child: Text('Mode Nuit'),
+                    child: Text('Night Mode'),
                   ),
                 ],
               ),
@@ -319,12 +323,72 @@ class GraphPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Graphique'),
-      ),
       body: Container(
-        child: Center(
-          child: Text('Placeholder pour le graphique'),
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: NetworkImage(
+              'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSx7IBkCtYd6ulSfLfDL-aSF3rv6UfmWYxbSE823q36sPiQNVFFLatTFdGeUSnmJ4tUzlo&usqp=CAU',
+            ),
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(Colors.black, BlendMode.dstATop),
+          ),
+        ),
+        child: Stack(
+          children: [
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: Icon(Icons.arrow_back),
+                ),
+              ),
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 30), // Adjust the height as needed
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: IconButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: Icon(Icons.arrow_back),
+                  ),
+                ),
+                SizedBox(height: 20), // Adjust the height as needed
+                Expanded(
+                  child: Center(
+                    child: DefaultTextStyle(
+                      style: GoogleFonts.indieFlower(
+                        textStyle: TextStyle(
+                          color: Colors.black.withOpacity(0.5),
+                          fontWeight: FontWeight.w300,
+                          fontSize: 40,
+                        ),
+                      ),
+                      child: AnimatedTextKit(
+                        animatedTexts: [
+                          TypewriterAnimatedText(
+                            'Graph page',
+                            speed: Duration(milliseconds: 200),
+                          ),
+                        ],
+                        totalRepeatCount: 1,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

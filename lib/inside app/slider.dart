@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_2/inside%20app/Thermostat.dart';
+
 import 'package:flutter_application_2/inside%20app/abtus.dart';
+import 'package:flutter_application_2/inside%20app/home.dart';
 
 class SliderPage extends StatefulWidget {
   const SliderPage({Key? key}) : super(key: key);
@@ -23,36 +25,43 @@ class _SliderPageState extends State<SliderPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          Expanded(
-            child: PageView(
-              controller: _pageController,
-              onPageChanged: (index) {
-                setState(() {
-                  _currentIndex = index;
-                });
-              },
-              children: [
-                Container(
-                  color: Colors.red,
-                  child: Center(
-                    child: Text('Hello, I am Turbidity',
-                        style: TextStyle(fontSize: 24)),
-                  ),
-                ),
-                Container(
-                  child: Apropsdenous(),
-                ),
-                ThermostatPage(),
-              ],
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: NetworkImage(
+              'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSx7IBkCtYd6ulSfLfDL-aSF3rv6UfmWYxbSE823q36sPiQNVFFLatTFdGeUSnmJ4tUzlo&usqp=CAU',
             ),
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(Colors.black, BlendMode.dstATop),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: _buildPageIndicator(),
-          ),
-        ],
+        ),
+        child: Column(
+          children: [
+            Expanded(
+              child: PageView(
+                controller: _pageController,
+                onPageChanged: (index) {
+                  setState(() {
+                    _currentIndex = index;
+                  });
+                },
+                children: [
+                  Container(
+                    child: homescreen(),
+                  ),
+                  Container(
+                    child: Apropsdenous(),
+                  ),
+                  ThermostatPage(),
+                ],
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: _buildPageIndicator(),
+            ),
+          ],
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,

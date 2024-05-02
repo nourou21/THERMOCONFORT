@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart'; // Import SystemServices
 
@@ -61,76 +60,79 @@ class _ApropsdenousState extends State<Apropsdenous> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        controller:
-            _scrollController, // Assign the scroll controller to the SingleChildScrollView
-        child: Container(
-          color: const Color.fromARGB(
-              255, 194, 101, 210), // Change background color to purple
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
-                  child: Row(
-                    children: [
-                      SizedBox(width: 20),
-                    ],
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Text(
-                  "    Thermoconfort ",
-                  style: TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(255, 188, 145, 82),
-                  ),
-                ),
-              ),
-              SizedBox(height: 20),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: NetworkImage(
+              'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSx7IBkCtYd6ulSfLfDL-aSF3rv6UfmWYxbSE823q36sPiQNVFFLatTFdGeUSnmJ4tUzlo&usqp=CAU',
+            ),
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(Colors.black, BlendMode.dstATop),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
                 child: Row(
                   children: [
-                    SizedBox(
-                      width: 120,
-                    ),
-                    Center(
-                      child: Text(
-                        "Notre equipe :",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.lightBlueAccent,
-                        ),
-                      ),
-                    ),
+                    SizedBox(width: 20),
                   ],
                 ),
               ),
-              SizedBox(height: 10),
-              _buildTeamMember(
-                'anonymous',
-                'assets/anonymous.jpg', // Change image path
-                'https://www.linkedin.com',
-                'https://www.facebook.com/',
-                'mailto:@gmail.com',
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                "    Thermoconfort ",
+                style: TextStyle(
+                  fontSize: 40,
+                  fontWeight: FontWeight.bold,
+                  color: Color.fromARGB(255, 188, 145, 82),
+                ),
               ),
-              _buildTeamMember(
-                'anonymous',
-                'assets/assil.jpg', // Change image path
-                'https://www.facebook.com//',
-                'https://www.facebook.com',
-                'mailto:',
+            ),
+            SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 120,
+                  ),
+                  Center(
+                    child: Text(
+                      "Notre equipe :",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.lightBlueAccent,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              // Add more team members as needed
-            ],
-          ),
+            ),
+            SizedBox(height: 10),
+            _buildTeamMember(
+              'anonymous',
+              'assets/anonymous.jpg', // Change image path
+              'https://www.linkedin.com',
+              'https://www.facebook.com/',
+              'mailto:@gmail.com',
+            ),
+            _buildTeamMember(
+              'anonymous',
+              'assets/assil.jpg', // Change image path
+              'https://www.facebook.com//',
+              'https://www.facebook.com',
+              'mailto:',
+            ),
+            // Add more team members as needed
+          ],
         ),
       ),
     );
