@@ -19,7 +19,8 @@ class _ThermostatPageState extends State<ThermostatPage>
   late Animation<Color?> _animation;
 
   String thermostatName = 'Thermoconfort';
-  double temperature = 20.0; // Weather temperature variable
+  double temperature = 20.0;
+  int readTemp = 0; // Change type to int
   bool handButtonPressed = false;
   bool isDarkMode = false;
   Color backgroundColor = Colors.white;
@@ -38,6 +39,9 @@ class _ThermostatPageState extends State<ThermostatPage>
       end: Colors.blue,
     ).animate(_controller);
     _controller.forward();
+
+    // Call the method to listen to temperature changes
+    listenToTemperatureChanges();
   }
 
   @override
@@ -50,16 +54,32 @@ class _ThermostatPageState extends State<ThermostatPage>
     databaseReference.child('project/vacation_mode').set(isVacationMode);
   }
 
+  void listenToTemperatureChanges() {
+    databaseReference.child('project/read_temp').onValue.listen((event) {
+      // Retrieve the temperature value from the database
+      final dynamic value = event.snapshot.value;
+      if (value is double || value is int) {
+        setState(() {
+          readTemp = value.toInt(); // Convert to int
+        });
+      } else {
+        print('Invalid temperature value from the database');
+      }
+    });
+  }
+
   void incrementTemperature() {
     setState(() {
       temperature += 1.0;
     });
+    sendTemperatureToDatabase(temperature);
   }
 
   void decrementTemperature() {
     setState(() {
       temperature -= 1.0;
     });
+    sendTemperatureToDatabase(temperature);
   }
 
   void openGraphPage() {
@@ -67,6 +87,10 @@ class _ThermostatPageState extends State<ThermostatPage>
       context,
       MaterialPageRoute(builder: (context) => GraphPage()),
     );
+  }
+
+  void sendTemperatureToDatabase(double temperature) {
+    databaseReference.child('project/temperature').set(temperature);
   }
 
   void changeThermostatName() async {
@@ -181,61 +205,14 @@ class _ThermostatPageState extends State<ThermostatPage>
       return;
     }
 
-    // If GPS is enabled, request location permission
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      // Show popup to request location permission
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Location Permission'),
-            content: Text(
-                'This app requires access to your location. Please grant permission in settings.'),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  // Open app settings to grant location permission
-                  Geolocator.openAppSettings();
-                },
-                child: Text('OK'),
-              ),
-            ],
-          );
-        },
-      );
-      return;
-    }
-
-    // If location permission is granted, show location information
-    try {
-      Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
-      displayLocationInformation(position);
-    } catch (e) {
-      // Show error popup
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Error'),
-            content: Text('Error fetching location: $e'),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text('OK'),
-              ),
-            ],
-          );
-        },
-      );
-    }
+    // If GPS is enabled, show location information
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+    displayLocationInformation(position);
   }
 
   void displayLocationInformation(Position position) async {
+    // Call the method to fetch weather information
     await fetchWeatherInformation(position);
 
     showDialog(
@@ -312,7 +289,7 @@ class _ThermostatPageState extends State<ThermostatPage>
                 Row(
                   children: [
                     SizedBox(
-                      width: 30,
+                      width: 6,
                     ),
                     GestureDetector(
                       onTap: () {
@@ -397,7 +374,7 @@ class _ThermostatPageState extends State<ThermostatPage>
             ),
             SizedBox(height: 20.0),
             Text(
-              '$temperature°C', // Display weather temperature
+              '$temperature°C',
               style: TextStyle(
                 fontSize: 35.0,
                 color: Color(0xFFB97A57),
@@ -414,6 +391,15 @@ class _ThermostatPageState extends State<ThermostatPage>
               ),
             ),
             SizedBox(height: 20.0),
+            Text(
+              '$readTemp°C', // Display readTemp instead of temperature
+              style: TextStyle(
+                fontSize: 35.0,
+                color: Color(0xFFB97A57),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 20.0),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
@@ -428,23 +414,6 @@ class _ThermostatPageState extends State<ThermostatPage>
                 SizedBox(width: 16.0),
                 SizedBox(width: 16.0),
               ],
-            ),
-            SizedBox(height: 20.0),
-            ElevatedButton(
-              onPressed: () async {
-                print("Button Pressed");
-                // Get the current position
-                try {
-                  Position position = await Geolocator.getCurrentPosition(
-                      desiredAccuracy: LocationAccuracy.high);
-                  print("Position: $position");
-                  // Display location information
-                  displayLocationInformation(position);
-                } catch (e) {
-                  print("Error getting position: $e");
-                }
-              },
-              child: Text('Show Latitude and Temperature'),
             ),
           ],
         ),
