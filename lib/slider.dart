@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_2/inside%20app/Thermostat.dart';
+import 'package:flutter_application_2/inside%20app/graph.dart';
+import 'package:flutter_application_2/inside%20app/paramettre.dart';
 
 class SliderPage extends StatefulWidget {
   const SliderPage({Key? key}) : super(key: key);
@@ -34,13 +36,11 @@ class _SliderPageState extends State<SliderPage> {
                   });
                 },
                 children: [
+                  Container(child: GraphPage()),
+                  Container(child: ThermostatPage()),
                   Container(
-                    child: Text("gggggggg"),
+                    child: Container(child: parametter()),
                   ),
-                  Container(
-                    child: Text("hi"),
-                  ),
-                  ThermostatPage(),
                 ],
               ),
             ),
@@ -63,14 +63,6 @@ class _SliderPageState extends State<SliderPage> {
         items: [
           BottomNavigationBarItem(
             icon: Image.asset(
-              'assets/PARA.png',
-              width: 24,
-              height: 24,
-            ),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Image.asset(
               'assets/GRAPHE.png',
               width: 24,
               height: 24,
@@ -80,6 +72,14 @@ class _SliderPageState extends State<SliderPage> {
           BottomNavigationBarItem(
             icon: Image.asset(
               'assets/HAND.png',
+              width: 24,
+              height: 24,
+            ),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset(
+              'assets/PARA.png',
               width: 24,
               height: 24,
             ),

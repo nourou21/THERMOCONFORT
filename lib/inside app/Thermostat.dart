@@ -94,13 +94,6 @@ class _ThermostatPageState extends State<ThermostatPage>
     });
   }
 
-  void openGraphPage() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => GraphPage()),
-    );
-  }
-
   void changeThermostatName() async {
     final TextEditingController controller = TextEditingController();
     await showDialog(
@@ -332,56 +325,6 @@ class _ThermostatPageState extends State<ThermostatPage>
                     ),
                   ),
                 ),
-                Row(
-                  children: [
-                    SizedBox(
-                      width: 30,
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        showDialog(
-                          context: context,
-                          builder: (_) => AlertDialog(
-                            title: Text('Settings'),
-                            content: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                ElevatedButton(
-                                  onPressed: () {},
-                                  child: Text('Change Background Color'),
-                                ),
-                                ElevatedButton(
-                                  onPressed: () {},
-                                  child: Text('Change Thermostat Name'),
-                                ),
-                                ElevatedButton(
-                                  onPressed: () {},
-                                  child: Text(
-                                    'Toggle Notifications',
-                                  ),
-                                ),
-                                ElevatedButton(
-                                  onPressed: () {},
-                                  child: Text('Toggle Dark Mode'),
-                                ),
-                                ElevatedButton(
-                                  onPressed: () async =>
-                                      await requestGPSActivation(),
-                                  child: Text("Request GPS Activation"),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                      child: Image.asset(
-                        'assets/PARA.png',
-                        width: 30.0,
-                        height: 30.0,
-                      ),
-                    ),
-                  ],
-                ),
               ],
             ),
             Row(
@@ -438,48 +381,28 @@ class _ThermostatPageState extends State<ThermostatPage>
             ),
             SizedBox(height: 20.0),
             Text(
-              '$readTemp°C', // Display readTemp instead of temperature
+              '$readTemp°C',
               style: TextStyle(
                 fontSize: 35.0,
-                color: Color(0xFFB97A57),
+                color: _getColorForTemperature(
+                    readTemp), // Use a function to determine color
               ),
               textAlign: TextAlign.center,
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                GestureDetector(
-                  onTap: openGraphPage,
-                  child: Image.asset(
-                    'assets/GRAPHE.png',
-                    width: 48.0,
-                    height: 48.0,
-                  ),
-                ),
-                SizedBox(width: 16.0),
-                SizedBox(width: 16.0),
-              ],
-            ),
             SizedBox(height: 20.0),
-            ElevatedButton(
-              onPressed: () async {
-                print("Button Pressed");
-                // Get the current position
-                try {
-                  Position position = await Geolocator.getCurrentPosition(
-                      desiredAccuracy: LocationAccuracy.high);
-                  print("Position: $position");
-                  // Display location information
-                  displayLocationInformation(position);
-                } catch (e) {
-                  print("Error getting position: $e");
-                }
-              },
-              child: Text('Show Latitude and Temperature'),
-            ),
           ],
         ),
       ),
     );
+  }
+}
+
+Color _getColorForTemperature(int temp) {
+  if (temp > 40) {
+    return Colors.red; // Hot
+  } else if (temp <= 5) {
+    return Colors.blue; // Cold
+  } else {
+    return Colors.black; // Normal
   }
 }
