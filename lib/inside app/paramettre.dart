@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
@@ -53,10 +54,6 @@ class _parametterState extends State<parametter> {
                 ElevatedButton(
                   onPressed: () {},
                   child: const Text('Change Thermostat Name'),
-                ),
-                ElevatedButton(
-                  onPressed: () {},
-                  child: const Text('Toggle Notifications'),
                 ),
                 ElevatedButton(
                   onPressed: () {},

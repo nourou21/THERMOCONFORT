@@ -21,16 +21,14 @@ class GraphPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      SizedBox(height: 40),
                       Row(
                         children: [
                           SizedBox(width: 10),
                         ],
                       ),
-                      SizedBox(height: 20),
                       Row(
                         children: [
-                          SizedBox(width: 110),
+                          SizedBox(width: 1),
                           Expanded(
                             child: DefaultTextStyle(
                               style: GoogleFonts.indieFlower(
