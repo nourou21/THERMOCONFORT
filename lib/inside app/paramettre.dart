@@ -25,17 +25,12 @@ class parametter extends StatefulWidget {
 
 class _parametterState extends State<parametter> {
   static int readTemp = 2;
-
   static bool isweatherVisible = false;
-  String location = 'Fetching location...';
-
-  static bool isweatherpressed =
-      false; // Define isweatherpressed as an instance variable
+  static bool isweatherpressed = false;
 
   @override
   void initState() {
     super.initState();
-    // Fetch weather information when the widget is initialized
     requestLocationAndFetchWeather();
   }
 
@@ -43,7 +38,6 @@ class _parametterState extends State<parametter> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        // Block back button press
         return false;
       },
       child: Scaffold(
@@ -71,15 +65,25 @@ class _parametterState extends State<parametter> {
                 ElevatedButton(
                   onPressed: () async {
                     setState(() {
-                      isweatherpressed = true; // Update isweatherpressed value
+                      isweatherpressed = true;
                     });
-
                     await requestGPSActivation();
-                    setState(() {
-                      isweatherVisible =     !isweatherVisible; // Toggle the visibility
-                    });
                   },
-                  child: const Text("Request GPS Activation"),
+                  child: Text(
+                    isweatherVisible
+                        ? 'GPS Activated'
+                        : 'Request GPS Activation',
+                  ),
+                  style: ButtonStyle(
+                    backgroundColor:
+                        MaterialStateProperty.resolveWith<Color>((states) {
+                      if (isweatherVisible) {
+                        return Colors.green;
+                      } else {
+                        return Colors.red;
+                      }
+                    }),
+                  ),
                 ),
               ],
             ),
@@ -96,7 +100,6 @@ class _parametterState extends State<parametter> {
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
 
     if (!serviceEnabled) {
-      // Show popup to enable GPS
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -107,16 +110,17 @@ class _parametterState extends State<parametter> {
               TextButton(
                 onPressed: () async {
                   Navigator.pop(context);
-                  // Open location settings to enable GPS
                   await Geolocator.openLocationSettings();
-                  // Request location after settings are enabled
-                  await requestLocationAndFetchWeather();
+                  // Do not set isweatherVisible to true here
                 },
                 child: Text('Yes'),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
+                  setState(() {
+                    isweatherVisible = false; // Turn off GPS activation button
+                  });
                 },
                 child: Text('No'),
               ),
@@ -127,10 +131,8 @@ class _parametterState extends State<parametter> {
       return;
     }
 
-    // If GPS is enabled, request location permission
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
-      // Show popup to request location permission
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -142,12 +144,19 @@ class _parametterState extends State<parametter> {
               TextButton(
                 onPressed: () async {
                   Navigator.pop(context);
-                  // Open app settings to grant location permission
                   await Geolocator.openAppSettings();
-                  // Request location after permission is granted
-                  await requestLocationAndFetchWeather();
+                  // Do not set isweatherVisible to true here
                 },
                 child: Text('OK'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  setState(() {
+                    isweatherVisible = false; // Turn off GPS activation button
+                  });
+                },
+                child: Text('Cancel'),
               ),
             ],
           );
@@ -156,24 +165,26 @@ class _parametterState extends State<parametter> {
       return;
     }
 
-    // If location permission is granted, request location and fetch weather
+    // If GPS is enabled and location permission is granted,
+    // set isweatherVisible to true to change the button color to green
+    setState(() {
+      isweatherVisible = true;
+    });
+
+    // Request location and fetch weather information
     await requestLocationAndFetchWeather();
   }
 
   Future<void> requestLocationAndFetchWeather() async {
     if (!isweatherpressed) {
-      // Return early if isweatherpressed is false
       return;
     }
 
-    // Request location
     try {
       Position position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.high);
-      // Display location information
       displayLocationInformation(position);
     } catch (e) {
-      // Show error popup
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -195,16 +206,13 @@ class _parametterState extends State<parametter> {
   }
 
   void displayLocationInformation(Position position) async {
-    // Fetch weather information using the obtained position
     await fetchWeatherInformation(position);
-    // Get the address details using Geolocator
     List<Placemark> placemarks =
         await placemarkFromCoordinates(position.latitude, position.longitude);
     String address =
         placemarks.isNotEmpty ? placemarks[0].name ?? 'Unknown' : 'Unknown';
     print(address);
 
-    // Display weather and location information in a popup
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -233,7 +241,6 @@ class _parametterState extends State<parametter> {
   }
 
   Future<void> fetchWeatherInformation(Position position) async {
-    // Fetch weather data using position
     String apiKey = '7a9509c1d4ae4acd92194014240305';
     String apiUrl =
         'http://api.weatherapi.com/v1/current.json?key=$apiKey&q=${position.latitude},${position.longitude}';
@@ -242,12 +249,11 @@ class _parametterState extends State<parametter> {
 
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
-      double temp = data['current']['temp_c']; // Temperature in Celsius
+      double temp = data['current']['temp_c'];
       setState(() {
         readTemp = temp.toInt();
       });
     } else {
-      // If API call fails, show an error message
       showDialog(
         context: context,
         builder: (BuildContext context) {

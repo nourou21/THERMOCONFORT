@@ -51,6 +51,7 @@ class _ThermostatPageState extends State<ThermostatPage>
     ).animate(_controller);
     _controller.forward();
     listenToTemperatureChanges();
+    listenToTemperatureConsigne();
   }
 
   @override
@@ -61,7 +62,10 @@ class _ThermostatPageState extends State<ThermostatPage>
   }
 
   void listenToTemperatureChanges() {
-    databaseReference.child('project/read_temp').onValue.listen((event) {
+    databaseReference
+        .child('project/temperature ambainte')
+        .onValue
+        .listen((event) {
       final dynamic value = event.snapshot.value;
       if (value is double || value is int) {
         setState(() {
@@ -89,7 +93,23 @@ class _ThermostatPageState extends State<ThermostatPage>
   }
 
   void sendTemperatureToDatabase(int temperature) {
-    databaseReference.child('project/temperature').set(temperature);
+    databaseReference.child('project/temperature consigne').set(temperature);
+  }
+
+  void listenToTemperatureConsigne() {
+    databaseReference
+        .child('project/temperature consigne')
+        .onValue
+        .listen((event) {
+      final dynamic value = event.snapshot.value;
+      if (value is double || value is int) {
+        setState(() {
+          temperature = value.toInt();
+        });
+      } else {
+        print('Invalid temperature value from the database');
+      }
+    });
   }
 
   void sendVacationModeToDatabase(bool isVacationMode) {
@@ -433,18 +453,24 @@ class _ThermostatPageState extends State<ThermostatPage>
                         ),
                       ),
                       SizedBox(height: 20.0),
-                      Text(
-                        '$readTemp°C',
-                        style: TextStyle(
-                          fontSize: 35.0,
-                          color: _getColorForTemperature(readTemp),
-                        ),
-                        textAlign: TextAlign.center,
+                      Column(
+                        children: [],
                       ),
                       Row(
                         children: [
                           SizedBox(
-                            width: 250,
+                            width: 80,
+                          ),
+                          Text(
+                            '$readTemp°C',
+                            style: TextStyle(
+                              fontSize: 35.0,
+                              color: _getColorForTemperature(readTemp),
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          SizedBox(
+                            width: 60,
                           ),
                           Stack(
                             children: [
