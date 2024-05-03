@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_application_2/auth/loginscreen.dart';
+
 import 'package:flutter_application_2/screens/login_screen/login_screen.dart';
 
 void main() async {

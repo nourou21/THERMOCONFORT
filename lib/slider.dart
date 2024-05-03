@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_2/inside%20app/Thermostat.dart';
 
 import 'package:flutter_application_2/inside%20app/abtus.dart';
-import 'package:flutter_application_2/inside%20app/home.dart';
 
 class SliderPage extends StatefulWidget {
   const SliderPage({Key? key}) : super(key: key);
@@ -47,7 +46,7 @@ class _SliderPageState extends State<SliderPage> {
                 },
                 children: [
                   Container(
-                    child: homescreen(),
+                    child: Text("gggggggg"),
                   ),
                   Container(
                     child: Apropsdenous(),

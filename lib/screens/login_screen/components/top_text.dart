@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_2/screens/login_screen/animations/change_screen_animation.dart';
-import 'package:flutter_application_2/utils/helper_functions.dart';
+import 'package:flutter_application_2/screens/login_screen/components/utils/helper_functions.dart';
+
 
 
 import 'login_content.dart';

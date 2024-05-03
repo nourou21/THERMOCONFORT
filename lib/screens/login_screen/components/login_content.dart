@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_application_2/inside%20app/slider.dart';
+
 import 'package:flutter_application_2/screens/login_screen/components/forgetpassword.dart';
-import 'package:flutter_application_2/utils/constants.dart';
-import 'package:flutter_application_2/utils/helper_functions.dart';
+import 'package:flutter_application_2/screens/login_screen/components/utils/constants.dart';
+import 'package:flutter_application_2/screens/login_screen/components/utils/helper_functions.dart';
+import 'package:flutter_application_2/slider.dart';
+
 import 'package:ionicons/ionicons.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../animations/change_screen_animation.dart';
 import 'bottom_text.dart';
@@ -34,6 +37,7 @@ class _LoginContentState extends State<LoginContent>
   final TextEditingController passwordController = TextEditingController();
   String _errorMessage = ''; // Store error messages
   bool _showPassword = false;
+  bool rememberMe = false; // Track the state of "Remember Me" checkbox
 
   StreamController<bool> _errorMessageVisibilityController =
       StreamController<bool>();
@@ -48,9 +52,13 @@ class _LoginContentState extends State<LoginContent>
     super.dispose();
   }
 
+  // Input field widget
   Widget _inputField(
-      String hint, IconData iconData, TextEditingController controller,
-      {bool isPassword = false}) {
+    String hint,
+    IconData iconData,
+    TextEditingController controller, {
+    bool isPassword = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 8),
       child: SizedBox(
@@ -95,6 +103,7 @@ class _LoginContentState extends State<LoginContent>
     );
   }
 
+  // Login button widget
   Widget loginButton(String title, {VoidCallback? onPressed}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 135, vertical: 16),
@@ -118,6 +127,7 @@ class _LoginContentState extends State<LoginContent>
     );
   }
 
+  // Divider between login and create account buttons
   Widget orDivider() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 130, vertical: 8),
@@ -143,6 +153,7 @@ class _LoginContentState extends State<LoginContent>
     );
   }
 
+  // Forgot password text widget
   Widget forgotPassword() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 110),
@@ -232,6 +243,8 @@ class _LoginContentState extends State<LoginContent>
 
   @override
   void initState() {
+    super.initState();
+
     createAccountContent = [
       _inputField('Name', Ionicons.person_outline, nameController),
       _inputField('Email', Ionicons.mail_outline, emailController),
@@ -276,7 +289,20 @@ class _LoginContentState extends State<LoginContent>
       );
     }
 
-    super.initState();
+    // Initialize the "Remember Me" checkbox state from shared preferences
+    loadRememberMeState();
+  }
+
+  void loadRememberMeState() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      rememberMe = prefs.getBool('rememberMe') ?? false;
+    });
+  }
+
+  void saveRememberMeState(bool value) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('rememberMe', value);
   }
 
   @override
@@ -301,6 +327,32 @@ class _LoginContentState extends State<LoginContent>
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: createAccountContent,
+              ),
+            ],
+          ),
+        ),
+        // "Remember Me" checkbox
+        Positioned(
+          top: 570, // Adjust the position as needed
+          left: 100, // Adjust the position as needed
+          child: Row(
+            children: [
+              Checkbox(
+                value: rememberMe,
+                onChanged: (value) {
+                  setState(() {
+                    rememberMe = value ?? false;
+                  });
+                  saveRememberMeState(
+                      rememberMe); // Save the state using shared preferences
+                },
+              ),
+              Text(
+                'Remember Me',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                ),
               ),
             ],
           ),

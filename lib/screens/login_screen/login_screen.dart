@@ -1,6 +1,6 @@
 import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'components/center_widget/center_widget.dart';
 import 'components/login_content.dart';
@@ -13,6 +13,8 @@ class LOGINN extends StatefulWidget {
 }
 
 class _LOGINNState extends State<LOGINN> {
+  bool rememberMe = false; // State variable for the checkbox
+
   Widget topWidget(double screenWidth) {
     return Transform.rotate(
       angle: -35 * math.pi / 180,
@@ -53,6 +55,25 @@ class _LOGINNState extends State<LOGINN> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    // Load the checkbox state from shared preferences when the widget initializes
+    loadRememberMeState();
+  }
+
+  void loadRememberMeState() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      rememberMe = prefs.getBool('rememberMe') ?? false;
+    });
+  }
+
+  void saveRememberMeState(bool value) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('rememberMe', value);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
 
@@ -70,7 +91,8 @@ class _LOGINNState extends State<LOGINN> {
             child: bottomWidget(screenSize.width),
           ),
           CenterWidget(size: screenSize),
-          const LoginContent(),
+          LoginContent(),
+          // Add the checkbox below the LoginContent widget
         ],
       ),
     );
