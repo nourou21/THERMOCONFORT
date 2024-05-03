@@ -17,11 +17,18 @@ class parametter extends StatefulWidget {
   static bool weatherpressed() {
     return _parametterState.isweatherpressed;
   }
+
+  static bool isiswWathervisible() {
+    return _parametterState.isweatherVisible;
+  }
 }
 
 class _parametterState extends State<parametter> {
   static int readTemp = 2;
+
+  static bool isweatherVisible = false;
   String location = 'Fetching location...';
+
   static bool isweatherpressed =
       false; // Define isweatherpressed as an instance variable
 
@@ -66,7 +73,11 @@ class _parametterState extends State<parametter> {
                     setState(() {
                       isweatherpressed = true; // Update isweatherpressed value
                     });
+
                     await requestGPSActivation();
+                    setState(() {
+                      isweatherVisible =     !isweatherVisible; // Toggle the visibility
+                    });
                   },
                   child: const Text("Request GPS Activation"),
                 ),
@@ -150,6 +161,11 @@ class _parametterState extends State<parametter> {
   }
 
   Future<void> requestLocationAndFetchWeather() async {
+    if (!isweatherpressed) {
+      // Return early if isweatherpressed is false
+      return;
+    }
+
     // Request location
     try {
       Position position = await Geolocator.getCurrentPosition(

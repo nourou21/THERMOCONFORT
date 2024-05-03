@@ -26,6 +26,7 @@ class _ThermostatPageState extends State<ThermostatPage>
   String thermostatName = 'Thermoconfort';
   int readTemp = 0;
   int temperature = 0;
+  bool isweatherVisible = parametter.isiswWathervisible();
   bool isweatherpressed = parametter.weatherpressed();
   int realWeather = parametter.getReadTemp();
   bool handButtonPressed = false;
@@ -321,33 +322,36 @@ class _ThermostatPageState extends State<ThermostatPage>
                       Row(
                         children: [
                           SizedBox(
-                            width: isweatherpressed
-                                ? 170
-                                : 0, // Set width to 0 if isweatherpressed is false
+                            width: isweatherpressed ? 230 : 0,
                           ),
-                          if (isweatherpressed == true) ...[
-                            Icon(
-                              // Choose weather icon based on temperature
-                              realWeather >= 25
-                                  ? WeatherIcons.day_sunny
-                                  : realWeather >= 15
-                                      ? WeatherIcons.day_cloudy
-                                      : WeatherIcons.cloud,
-                              size: 50,
-                              color: Colors.orange,
+                          Visibility(
+                            visible: isweatherVisible,
+                            child: Column(
+                              children: [
+                                Icon(
+                                  // Choose weather icon based on temperature
+                                  realWeather >= 25
+                                      ? WeatherIcons.day_sunny
+                                      : realWeather >= 15
+                                          ? WeatherIcons.day_cloudy
+                                          : WeatherIcons.cloud,
+                                  size: 50,
+                                  color: Colors.orange,
+                                ),
+                                SizedBox(
+                                  height: 5,
+                                ),
+                                Text(
+                                  'Its : $realWeather°C',
+                                  style: GoogleFonts.lato(
+                                    fontSize: 20.0,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
                             ),
-                            SizedBox(
-                              width: 30,
-                            ),
-                            Text(
-                              'Its : $realWeather°C',
-                              style: GoogleFonts.lato(
-                                fontSize: 20.0,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ],
+                          ),
                         ],
                       ),
                       SizedBox(height: 10),
@@ -378,7 +382,7 @@ class _ThermostatPageState extends State<ThermostatPage>
                           ),
                         ],
                       ),
-                      SizedBox(height: 20.0),
+                      SizedBox(height: 1.0),
                       Visibility(
                         visible: isToggleVisible,
                         child: ToggleSwitch(

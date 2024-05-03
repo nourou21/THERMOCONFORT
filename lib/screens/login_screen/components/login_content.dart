@@ -244,6 +244,16 @@ class _LoginContentState extends State<LoginContent>
   @override
   void initState() {
     super.initState();
+    loginContent = [
+      _inputField('Email', Ionicons.mail_outline, emailController),
+      _inputField('Password', Ionicons.lock_closed_outline, passwordController,
+          isPassword: true),
+      loginButton('Log In', onPressed: () {
+        // Implement login functionality
+        loginPressed(emailController.text, passwordController.text);
+      }),
+      forgotPassword(),
+    ];
 
     createAccountContent = [
       _inputField('Name', Ionicons.person_outline, nameController),
@@ -256,17 +266,6 @@ class _LoginContentState extends State<LoginContent>
             nameController.text, emailController.text, passwordController.text);
       }),
       orDivider(),
-    ];
-
-    loginContent = [
-      _inputField('Email', Ionicons.mail_outline, emailController),
-      _inputField('Password', Ionicons.lock_closed_outline, passwordController,
-          isPassword: true),
-      loginButton('Log In', onPressed: () {
-        // Implement login functionality
-        loginPressed(emailController.text, passwordController.text);
-      }),
-      forgotPassword(),
     ];
 
     ChangeScreenAnimation.initialize(
