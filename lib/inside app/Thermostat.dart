@@ -20,13 +20,14 @@ class _ThermostatPageState extends State<ThermostatPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<Color?> _animation;
-
+  bool isrelay = true;
   String thermostatName = 'Thermoconfort';
   int readTemp = 0;
   int temperature = 0;
 
   bool handButtonPressed = false;
   bool isDarkMode = false;
+
   Color backgroundColor = Colors.white;
 
   final databaseReference = FirebaseDatabase.instance.reference();
@@ -64,6 +65,21 @@ class _ThermostatPageState extends State<ThermostatPage>
         });
       } else {
         print('Invalid temperature value from the database');
+      }
+    });
+    // Listen to changes in relay status
+    databaseReference.child('project/relay').onValue.listen((event) {
+      final dynamic value = event.snapshot.value;
+      if (value == 'on') {
+        // If relay is on, show the fire image
+        setState(() {
+          isrelay = true;
+        });
+      } else {
+        // If relay is off, hide the fire image
+        setState(() {
+          isrelay = false;
+        });
       }
     });
   }
@@ -381,6 +397,33 @@ class _ThermostatPageState extends State<ThermostatPage>
                           color: _getColorForTemperature(readTemp),
                         ),
                         textAlign: TextAlign.center,
+                      ),
+                      Row(
+                        children: [
+                          SizedBox(
+                            width: 250,
+                          ),
+                          Stack(
+                            children: [
+                              Image.asset(
+                                'assets/phone.png', // Second image
+                                width: 100,
+                                height: 100,
+                              ),
+                              Positioned(
+                                top: 20, // Adjust the position as needed
+                                left: 30, // Adjust the position as needed
+                                child: isrelay
+                                    ? Image.asset(
+                                        'assets/fire.png', // First image
+                                        width: 40,
+                                        height: 40,
+                                      )
+                                    : SizedBox(),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ],
                   ),
