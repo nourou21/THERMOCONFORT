@@ -5,60 +5,61 @@ import 'package:google_fonts/google_fonts.dart';
 class GraphPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(
-              height: 40,
-            ),
-            Row(
-              children: [
-                SizedBox(
-                  width: 10,
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: Scaffold(
+        body: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight,
                 ),
-                IconButton(
-                  onPressed: () {
-                    // Pop the current screen when the user clicks on the back button
-                    Navigator.pop(context);
-                  },
-                  icon: Icon(Icons.arrow_back),
-                ),
-              ],
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            Row(
-              children: [
-                SizedBox(
-                  width: 110,
-                ),
-                Expanded(
-                  child: DefaultTextStyle(
-                    style: GoogleFonts.indieFlower(
-                      textStyle: TextStyle(
-                        color: Colors.black.withOpacity(0.5),
-                        fontWeight: FontWeight.w300,
-                        fontSize: 40,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 20.0),
+                  alignment: Alignment.center,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      SizedBox(height: 40),
+                      Row(
+                        children: [
+                          SizedBox(width: 10),
+                        ],
                       ),
-                    ),
-                    child: AnimatedTextKit(
-                      animatedTexts: [
-                        TypewriterAnimatedText(
-                          'Graph page',
-                          speed: Duration(milliseconds: 200),
-                        ),
-                      ],
-                      totalRepeatCount: 1,
-                    ),
+                      SizedBox(height: 20),
+                      Row(
+                        children: [
+                          SizedBox(width: 110),
+                          Expanded(
+                            child: DefaultTextStyle(
+                              style: GoogleFonts.indieFlower(
+                                textStyle: TextStyle(
+                                  color: Colors.black.withOpacity(0.5),
+                                  fontWeight: FontWeight.w300,
+                                  fontSize: 40,
+                                ),
+                              ),
+                              child: AnimatedTextKit(
+                                animatedTexts: [
+                                  TypewriterAnimatedText(
+                                    'Graph page',
+                                    speed: Duration(milliseconds: 200),
+                                  ),
+                                ],
+                                totalRepeatCount: 1,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 20),
+                    ],
                   ),
                 ),
-              ],
-            ),
-            SizedBox(height: 20),
-          ],
+              ),
+            );
+          },
         ),
       ),
     );

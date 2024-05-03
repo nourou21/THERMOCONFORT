@@ -1,10 +1,8 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
-
-int readTemp = 2;
 
 class parametter extends StatefulWidget {
   const parametter({Key? key}) : super(key: key);
@@ -14,34 +12,51 @@ class parametter extends StatefulWidget {
 }
 
 class _parametterState extends State<parametter> {
+  int readTemp = 2;
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch weather information when the widget is initialized
+    requestLocationAndFetchWeather();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ElevatedButton(
-              onPressed: () {},
-              child: const Text('Change Background Color'),
+    return WillPopScope(
+      onWillPop: () async {
+        // Block back button press
+        return false;
+      },
+      child: Scaffold(
+        body: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: () {},
+                  child: const Text('Change Background Color'),
+                ),
+                ElevatedButton(
+                  onPressed: () {},
+                  child: const Text('Change Thermostat Name'),
+                ),
+                ElevatedButton(
+                  onPressed: () {},
+                  child: const Text('Toggle Notifications'),
+                ),
+                ElevatedButton(
+                  onPressed: () {},
+                  child: const Text('Toggle Dark Mode'),
+                ),
+                ElevatedButton(
+                  onPressed: () async => await requestGPSActivation(),
+                  child: const Text("Request GPS Activation"),
+                ),
+              ],
             ),
-            ElevatedButton(
-              onPressed: () {},
-              child: const Text('Change Thermostat Name'),
-            ),
-            ElevatedButton(
-              onPressed: () {},
-              child: const Text('Toggle Notifications'),
-            ),
-            ElevatedButton(
-              onPressed: () {},
-              child: const Text('Toggle Dark Mode'),
-            ),
-            ElevatedButton(
-              onPressed: () async => await requestGPSActivation(),
-              child: const Text("Request GPS Activation"),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -52,6 +67,7 @@ class _parametterState extends State<parametter> {
     LocationPermission permission;
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
+
     if (!serviceEnabled) {
       // Show popup to enable GPS
       showDialog(
@@ -62,10 +78,12 @@ class _parametterState extends State<parametter> {
             content: Text('GPS is disabled. Do you want to enable it?'),
             actions: <Widget>[
               TextButton(
-                onPressed: () {
+                onPressed: () async {
                   Navigator.pop(context);
                   // Open location settings to enable GPS
-                  Geolocator.openLocationSettings();
+                  await Geolocator.openLocationSettings();
+                  // Request location after settings are enabled
+                  await requestLocationAndFetchWeather();
                 },
                 child: Text('Yes'),
               ),
@@ -95,10 +113,12 @@ class _parametterState extends State<parametter> {
                 'This app requires access to your location. Please grant permission in settings.'),
             actions: <Widget>[
               TextButton(
-                onPressed: () {
+                onPressed: () async {
                   Navigator.pop(context);
                   // Open app settings to grant location permission
-                  Geolocator.openAppSettings();
+                  await Geolocator.openAppSettings();
+                  // Request location after permission is granted
+                  await requestLocationAndFetchWeather();
                 },
                 child: Text('OK'),
               ),
@@ -109,10 +129,16 @@ class _parametterState extends State<parametter> {
       return;
     }
 
-    // If location permission is granted, show location information
+    // If location permission is granted, request location and fetch weather
+    await requestLocationAndFetchWeather();
+  }
+
+  Future<void> requestLocationAndFetchWeather() async {
+    // Request location
     try {
       Position position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.high);
+      // Display location information
       displayLocationInformation(position);
     } catch (e) {
       // Show error popup
@@ -137,24 +163,77 @@ class _parametterState extends State<parametter> {
   }
 
   void displayLocationInformation(Position position) async {
+    // Fetch weather information using the obtained position
     await fetchWeatherInformation(position);
+    // Get the address details using Geolocator
+    List<Placemark> placemarks =
+        await placemarkFromCoordinates(position.latitude, position.longitude);
+    String address =
+        placemarks.isNotEmpty ? placemarks[0].name ?? 'Unknown' : 'Unknown';
+    print(address);
+
+    // Display weather and location information in a popup
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Weather Information'),
+          content: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Weather Temperature: $readTemp°C'),
+              SizedBox(height: 10),
+              Text('Location: $address'),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> fetchWeatherInformation(Position position) async {
     // Fetch weather data using position
-    String weatherApiKey = 'your_weather_api_key';
+    String apiKey = '7a9509c1d4ae4acd92194014240305';
     String apiUrl =
-        'http://api.openweathermap.org/data/2.5/weather?lat=${position.latitude}&lon=${position.longitude}&appid=$weatherApiKey';
+        'http://api.weatherapi.com/v1/current.json?key=$apiKey&q=${position.latitude},${position.longitude}';
 
     http.Response response = await http.get(Uri.parse(apiUrl));
 
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
-      double temp = data['main']['temp'];
+      double temp = data['current']['temp_c']; // Temperature in Celsius
       setState(() {
-        readTemp = (temp - 273.15)
-            as int; // Convert temperature from Kelvin to Celsius and assign to readTemp
+        readTemp = temp.toInt();
       });
+    } else {
+      // If API call fails, show an error message
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Error'),
+            content: Text(
+                'Failed to fetch weather information. Please try again later.'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
     }
   }
 }

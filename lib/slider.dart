@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_2/inside%20app/Thermostat.dart';
 import 'package:flutter_application_2/inside%20app/graph.dart';
 import 'package:flutter_application_2/inside%20app/paramettre.dart';
+import 'package:flutter_feather_icons/flutter_feather_icons.dart';
+import 'package:iconly/iconly.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 class SliderPage extends StatefulWidget {
   const SliderPage({Key? key}) : super(key: key);
@@ -56,32 +59,56 @@ class _SliderPageState extends State<SliderPage> {
         onTap: (index) {
           setState(() {
             _currentIndex = index;
-            _pageController.animateToPage(index,
-                duration: Duration(milliseconds: 500), curve: Curves.ease);
+            _pageController.animateToPage(
+              index,
+              duration: Duration(milliseconds: 500),
+              curve: Curves.ease,
+            );
+
+            // Toggle the visibility of the toggle switch when the specific icon is tapped
+            if (index == 1) {
+              // Here you can add your logic to toggle visibility
+            }
           });
         },
         items: [
           BottomNavigationBarItem(
-            icon: Image.asset(
-              'assets/GRAPHE.png',
-              width: 24,
-              height: 24,
+            icon: IconButton(
+              onPressed: () {
+                _pageController.jumpToPage(0);
+              },
+              icon: Image.asset(
+                'assets/GRAPHE.png',
+                width: 36,
+                height: 36,
+              ),
             ),
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: Image.asset(
-              'assets/HAND.png',
-              width: 24,
-              height: 24,
+            icon: IconButton(
+              onPressed: () {
+                _pageController.jumpToPage(1);
+                setState(() {
+                  isToggleVisible = !isToggleVisible; // Toggle the visibility
+                });
+              },
+              icon: Icon(
+                MdiIcons.thumbsUpDownOutline,
+                size: 30,
+              ),
             ),
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: Image.asset(
-              'assets/PARA.png',
-              width: 24,
-              height: 24,
+            icon: IconButton(
+              onPressed: () {
+                _pageController.jumpToPage(2);
+              },
+              icon: Icon(
+                Icons.settings_suggest_outlined,
+                size: 40,
+              ),
             ),
             label: '',
           ),
@@ -104,7 +131,7 @@ class _SliderPageState extends State<SliderPage> {
       height: 8.0,
       width: isActive ? 24.0 : 16.0,
       decoration: BoxDecoration(
-        color: isActive ? Colors.purple : Colors.grey,
+        color: isActive ? Colors.purple : Colors.brown,
         borderRadius: BorderRadius.circular(12),
       ),
     );

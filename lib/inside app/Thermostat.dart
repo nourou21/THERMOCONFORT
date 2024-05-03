@@ -9,6 +9,8 @@ import 'package:toggle_switch/toggle_switch.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 
+bool isToggleVisible = false;
+
 class ThermostatPage extends StatefulWidget {
   @override
   _ThermostatPageState createState() => _ThermostatPageState();
@@ -20,9 +22,9 @@ class _ThermostatPageState extends State<ThermostatPage>
   late Animation<Color?> _animation;
 
   String thermostatName = 'Thermoconfort';
-  int readTemp =
-      0; // Updated to hold the temperature value fetched from the database
+  int readTemp = 0;
   int temperature = 0;
+
   bool handButtonPressed = false;
   bool isDarkMode = false;
   Color backgroundColor = Colors.white;
@@ -43,27 +45,22 @@ class _ThermostatPageState extends State<ThermostatPage>
       end: Colors.blue,
     ).animate(_controller);
     _controller.forward();
-
-    // Listen for temperature changes
-    listenToTemperatureChanges(); // Call the new function to start listening for temperature changes
+    listenToTemperatureChanges();
   }
 
   @override
   void dispose() {
     _controller.dispose();
-    temperatureSubscription
-        .cancel(); // Cancel the subscription to avoid memory leaks
+    temperatureSubscription.cancel();
     super.dispose();
   }
 
-  // New function to listen for temperature changes in the database
   void listenToTemperatureChanges() {
     databaseReference.child('project/read_temp').onValue.listen((event) {
-      // Retrieve the temperature value from the database
       final dynamic value = event.snapshot.value;
       if (value is double || value is int) {
         setState(() {
-          readTemp = value.toInt(); // Convert to int
+          readTemp = value.toInt();
         });
       } else {
         print('Invalid temperature value from the database');
@@ -71,7 +68,6 @@ class _ThermostatPageState extends State<ThermostatPage>
     });
   }
 
-  // Function to send the temperature to the database
   void sendTemperatureToDatabase(int temperature) {
     databaseReference.child('project/temperature').set(temperature);
   }
@@ -83,14 +79,14 @@ class _ThermostatPageState extends State<ThermostatPage>
   void incrementTemperature() {
     setState(() {
       temperature += 1;
-      sendTemperatureToDatabase(temperature); // Send temperature to database
+      sendTemperatureToDatabase(temperature);
     });
   }
 
   void decrementTemperature() {
     setState(() {
       temperature -= 1;
-      sendTemperatureToDatabase(temperature); // Send temperature to database
+      sendTemperatureToDatabase(temperature);
     });
   }
 
@@ -154,7 +150,6 @@ class _ThermostatPageState extends State<ThermostatPage>
   }
 
   Future<void> fetchWeatherInformation(Position position) async {
-    // Fetch weather data using position
     String weatherApiKey = 'your_weather_api_key';
     String apiUrl =
         'http://api.openweathermap.org/data/2.5/weather?lat=${position.latitude}&lon=${position.longitude}&appid=$weatherApiKey';
@@ -165,8 +160,7 @@ class _ThermostatPageState extends State<ThermostatPage>
       var data = jsonDecode(response.body);
       double temp = data['main']['temp'];
       setState(() {
-        readTemp = (temp - 273.15)
-            as int; // Convert temperature from Kelvin to Celsius and assign to readTemp
+        readTemp = (temp - 273.15).toInt();
       });
     }
   }
@@ -177,7 +171,6 @@ class _ThermostatPageState extends State<ThermostatPage>
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      // Show popup to enable GPS
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -188,7 +181,6 @@ class _ThermostatPageState extends State<ThermostatPage>
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
-                  // Open location settings to enable GPS
                   Geolocator.openLocationSettings();
                 },
                 child: Text('Yes'),
@@ -206,10 +198,8 @@ class _ThermostatPageState extends State<ThermostatPage>
       return;
     }
 
-    // If GPS is enabled, request location permission
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
-      // Show popup to request location permission
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -221,7 +211,6 @@ class _ThermostatPageState extends State<ThermostatPage>
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
-                  // Open app settings to grant location permission
                   Geolocator.openAppSettings();
                 },
                 child: Text('OK'),
@@ -233,13 +222,11 @@ class _ThermostatPageState extends State<ThermostatPage>
       return;
     }
 
-    // If location permission is granted, show location information
     try {
       Position position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.high);
       displayLocationInformation(position);
     } catch (e) {
-      // Show error popup
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -292,105 +279,115 @@ class _ThermostatPageState extends State<ThermostatPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        child: Column(
-          children: <Widget>[
-            SizedBox(
-              height: 70,
-            ),
-            Row(
-              children: [
-                SizedBox(
-                  width: 70,
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: Scaffold(
+        body: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight,
                 ),
-                DefaultTextStyle(
-                  style: TextStyle(
-                    color: _animation.value,
-                  ),
-                  child: SizedBox(
-                    height: 120.0,
-                    child: TyperAnimatedTextKit(
-                      text: [thermostatName],
-                      textStyle: GoogleFonts.indieFlower(
-                        textStyle: TextStyle(
-                          color: Colors.black.withOpacity(0.5),
-                          fontWeight: FontWeight.w300,
-                          fontSize: 40,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 20.0),
+                  alignment: Alignment.center,
+                  color: backgroundColor,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          DefaultTextStyle(
+                            style: TextStyle(
+                              color: _animation.value,
+                            ),
+                            child: SizedBox(
+                              height: 120.0,
+                              child: TyperAnimatedTextKit(
+                                text: [thermostatName],
+                                textStyle: GoogleFonts.indieFlower(
+                                  textStyle: TextStyle(
+                                    color: Colors.black.withOpacity(0.5),
+                                    fontWeight: FontWeight.w300,
+                                    fontSize: 40,
+                                  ),
+                                ),
+                                textAlign: TextAlign.start,
+                                isRepeatingAnimation: false,
+                                speed: Duration(milliseconds: 200),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 20.0),
+                      Visibility(
+                        visible: isToggleVisible,
+                        child: ToggleSwitch(
+                          minWidth: 90.0,
+                          cornerRadius: 20.0,
+                          activeFgColor: Colors.white,
+                          inactiveBgColor: Colors.grey,
+                          inactiveFgColor: Colors.white,
+                          labels: [
+                            'Vacation\nMode', // Add line break here
+                            'Night\nMode' // Add line break here
+                          ],
+                          initialLabelIndex: handButtonPressed ? 0 : 1,
+                          onToggle: (index) {
+                            setState(() {
+                              handButtonPressed = index == 0;
+                            });
+
+                            sendVacationModeToDatabase(handButtonPressed);
+                          },
                         ),
                       ),
-                      textAlign: TextAlign.start,
-                      isRepeatingAnimation: false,
-                      speed: Duration(milliseconds: 200),
-                    ),
+                      SizedBox(height: 20.0),
+                      GestureDetector(
+                        onTap: incrementTemperature,
+                        child: Image.asset(
+                          'assets/UP.png',
+                          width: 65.0,
+                          height: 65.0,
+                        ),
+                      ),
+                      SizedBox(height: 20.0),
+                      Text(
+                        '$temperature°C',
+                        style: TextStyle(
+                          fontSize: 35.0,
+                          color: Color(0xFFB97A57),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 20.0),
+                      GestureDetector(
+                        onTap: decrementTemperature,
+                        child: Image.asset(
+                          'assets/DOWN.png',
+                          width: 65.0,
+                          height: 65.0,
+                        ),
+                      ),
+                      SizedBox(height: 20.0),
+                      Text(
+                        '$readTemp°C',
+                        style: TextStyle(
+                          fontSize: 35.0,
+                          color: _getColorForTemperature(readTemp),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-            Row(
-              children: [
-                SizedBox(
-                  width: 100,
-                ),
-                ToggleSwitch(
-                  minWidth: 90.0,
-                  cornerRadius: 20.0,
-                  activeFgColor: Colors.white,
-                  inactiveBgColor: Colors.grey,
-                  inactiveFgColor: Colors.white,
-                  labels: [
-                    'Vacation\nMode', // Add line break here
-                    'Night\nMode' // Add line break here
-                  ],
-                  initialLabelIndex: handButtonPressed ? 0 : 1,
-                  onToggle: (index) {
-                    setState(() {
-                      handButtonPressed = index == 0;
-                    });
-                    sendVacationModeToDatabase(handButtonPressed);
-                  },
-                ),
-              ],
-            ),
-            SizedBox(height: 40.0),
-            GestureDetector(
-              onTap: incrementTemperature,
-              child: Image.asset(
-                'assets/UP.png',
-                width: 65.0,
-                height: 65.0,
               ),
-            ),
-            SizedBox(height: 20.0),
-            Text(
-              '$temperature°C',
-              style: TextStyle(
-                fontSize: 35.0,
-                color: Color(0xFFB97A57),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 20.0),
-            GestureDetector(
-              onTap: decrementTemperature,
-              child: Image.asset(
-                'assets/DOWN.png',
-                width: 65.0,
-                height: 65.0,
-              ),
-            ),
-            SizedBox(height: 20.0),
-            Text(
-              '$readTemp°C',
-              style: TextStyle(
-                fontSize: 35.0,
-                color: _getColorForTemperature(
-                    readTemp), // Use a function to determine color
-              ),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 20.0),
-          ],
+            );
+          },
         ),
       ),
     );
