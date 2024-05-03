@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_2/inside%20app/Thermostat.dart';
 
-import 'package:flutter_application_2/inside%20app/abtus.dart';
-
 class SliderPage extends StatefulWidget {
   const SliderPage({Key? key}) : super(key: key);
 
@@ -25,15 +23,6 @@ class _SliderPageState extends State<SliderPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: NetworkImage(
-              'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSx7IBkCtYd6ulSfLfDL-aSF3rv6UfmWYxbSE823q36sPiQNVFFLatTFdGeUSnmJ4tUzlo&usqp=CAU',
-            ),
-            fit: BoxFit.cover,
-            colorFilter: ColorFilter.mode(Colors.black, BlendMode.dstATop),
-          ),
-        ),
         child: Column(
           children: [
             Expanded(
@@ -49,7 +38,7 @@ class _SliderPageState extends State<SliderPage> {
                     child: Text("gggggggg"),
                   ),
                   Container(
-                    child: Apropsdenous(),
+                    child: Text("hi"),
                   ),
                   ThermostatPage(),
                 ],
@@ -73,16 +62,28 @@ class _SliderPageState extends State<SliderPage> {
         },
         items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+            icon: Image.asset(
+              'assets/PARA.png',
+              width: 24,
+              height: 24,
+            ),
+            label: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.info),
-            label: 'About Us',
+            icon: Image.asset(
+              'assets/GRAPHE.png',
+              width: 24,
+              height: 24,
+            ),
+            label: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.opacity),
-            label: 'Turbidity',
+            icon: Image.asset(
+              'assets/HAND.png',
+              width: 24,
+              height: 24,
+            ),
+            label: '',
           ),
         ],
       ),
@@ -103,7 +104,7 @@ class _SliderPageState extends State<SliderPage> {
       height: 8.0,
       width: isActive ? 24.0 : 16.0,
       decoration: BoxDecoration(
-        color: isActive ? Colors.black : Colors.grey,
+        color: isActive ? Colors.purple : Colors.grey,
         borderRadius: BorderRadius.circular(12),
       ),
     );

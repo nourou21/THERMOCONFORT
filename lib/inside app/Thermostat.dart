@@ -22,6 +22,7 @@ class _ThermostatPageState extends State<ThermostatPage>
   String thermostatName = 'Thermoconfort';
   int readTemp =
       0; // Updated to hold the temperature value fetched from the database
+  int temperature = 0;
   bool handButtonPressed = false;
   bool isDarkMode = false;
   Color backgroundColor = Colors.white;
@@ -70,19 +71,26 @@ class _ThermostatPageState extends State<ThermostatPage>
     });
   }
 
+  // Function to send the temperature to the database
+  void sendTemperatureToDatabase(int temperature) {
+    databaseReference.child('project/temperature').set(temperature);
+  }
+
   void sendVacationModeToDatabase(bool isVacationMode) {
     databaseReference.child('project/vacation_mode').set(isVacationMode);
   }
 
   void incrementTemperature() {
     setState(() {
-      readTemp += 1; // Increment readTemp instead of temperature
+      temperature += 1;
+      sendTemperatureToDatabase(temperature); // Send temperature to database
     });
   }
 
   void decrementTemperature() {
     setState(() {
-      readTemp -= 1; // Decrement readTemp instead of temperature
+      temperature -= 1;
+      sendTemperatureToDatabase(temperature); // Send temperature to database
     });
   }
 
@@ -293,15 +301,6 @@ class _ThermostatPageState extends State<ThermostatPage>
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: NetworkImage(
-              'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSx7IBkCtYd6ulSfLfDL-aSF3rv6UfmWYxbSE823q36sPiQNVFFLatTFdGeUSnmJ4tUzlo&usqp=CAU',
-            ),
-            fit: BoxFit.cover,
-            colorFilter: ColorFilter.mode(Colors.black, BlendMode.dstATop),
-          ),
-        ),
         child: Column(
           children: <Widget>[
             SizedBox(
@@ -348,11 +347,11 @@ class _ThermostatPageState extends State<ThermostatPage>
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 ElevatedButton(
-                                  onPressed: changeBackgroundColor,
+                                  onPressed: () {},
                                   child: Text('Change Background Color'),
                                 ),
                                 ElevatedButton(
-                                  onPressed: changeThermostatName,
+                                  onPressed: () {},
                                   child: Text('Change Thermostat Name'),
                                 ),
                                 ElevatedButton(
@@ -362,7 +361,7 @@ class _ThermostatPageState extends State<ThermostatPage>
                                   ),
                                 ),
                                 ElevatedButton(
-                                  onPressed: toggleDarkMode,
+                                  onPressed: () {},
                                   child: Text('Toggle Dark Mode'),
                                 ),
                                 ElevatedButton(
@@ -421,7 +420,7 @@ class _ThermostatPageState extends State<ThermostatPage>
             ),
             SizedBox(height: 20.0),
             Text(
-              '$readTemp°C', // Display readTemp instead of temperature
+              '$temperature°C',
               style: TextStyle(
                 fontSize: 35.0,
                 color: Color(0xFFB97A57),
