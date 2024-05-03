@@ -9,10 +9,21 @@ class parametter extends StatefulWidget {
 
   @override
   State<parametter> createState() => _parametterState();
+
+  static int getReadTemp() {
+    return _parametterState.readTemp;
+  }
+
+  static bool weatherpressed() {
+    return _parametterState.isweatherpressed;
+  }
 }
 
 class _parametterState extends State<parametter> {
-  int readTemp = 2;
+  static int readTemp = 2;
+  String location = 'Fetching location...';
+  static bool isweatherpressed =
+      false; // Define isweatherpressed as an instance variable
 
   @override
   void initState() {
@@ -51,7 +62,12 @@ class _parametterState extends State<parametter> {
                   child: const Text('Toggle Dark Mode'),
                 ),
                 ElevatedButton(
-                  onPressed: () async => await requestGPSActivation(),
+                  onPressed: () async {
+                    setState(() {
+                      isweatherpressed = true; // Update isweatherpressed value
+                    });
+                    await requestGPSActivation();
+                  },
                   child: const Text("Request GPS Activation"),
                 ),
               ],

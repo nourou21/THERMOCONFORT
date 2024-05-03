@@ -3,11 +3,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter_application_2/inside%20app/graph.dart';
+import 'package:flutter_application_2/inside%20app/paramettre.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
+import 'package:weather_icons/weather_icons.dart';
 
 bool isToggleVisible = false;
 
@@ -24,7 +26,8 @@ class _ThermostatPageState extends State<ThermostatPage>
   String thermostatName = 'Thermoconfort';
   int readTemp = 0;
   int temperature = 0;
-
+  bool isweatherpressed = parametter.weatherpressed();
+  int realWeather = parametter.getReadTemp();
   bool handButtonPressed = false;
   bool isDarkMode = false;
 
@@ -166,7 +169,7 @@ class _ThermostatPageState extends State<ThermostatPage>
   }
 
   Future<void> fetchWeatherInformation(Position position) async {
-    String weatherApiKey = 'your_weather_api_key';
+    String weatherApiKey = '7a9509c1d4ae4acd92194014240305';
     String apiUrl =
         'http://api.openweathermap.org/data/2.5/weather?lat=${position.latitude}&lon=${position.longitude}&appid=$weatherApiKey';
 
@@ -312,6 +315,42 @@ class _ThermostatPageState extends State<ThermostatPage>
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
+                      SizedBox(
+                        height: 30,
+                      ),
+                      Row(
+                        children: [
+                          SizedBox(
+                            width: isweatherpressed
+                                ? 170
+                                : 0, // Set width to 0 if isweatherpressed is false
+                          ),
+                          if (isweatherpressed == true) ...[
+                            Icon(
+                              // Choose weather icon based on temperature
+                              realWeather >= 25
+                                  ? WeatherIcons.day_sunny
+                                  : realWeather >= 15
+                                      ? WeatherIcons.day_cloudy
+                                      : WeatherIcons.cloud,
+                              size: 50,
+                              color: Colors.orange,
+                            ),
+                            SizedBox(
+                              width: 30,
+                            ),
+                            Text(
+                              'Its : $realWeather°C',
+                              style: GoogleFonts.lato(
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      SizedBox(height: 10),
                       SizedBox(height: 10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
