@@ -6,7 +6,7 @@ import 'components/center_widget/center_widget.dart';
 import 'components/login_content.dart';
 
 class LOGINN extends StatefulWidget {
-  const LOGINN({Key? key}) : super(key: key);
+  const LOGINN({Key? key, required Null Function(dynamic email, dynamic password) onLogin}) : super(key: key);
 
   @override
   State<LOGINN> createState() => _LOGINNState();

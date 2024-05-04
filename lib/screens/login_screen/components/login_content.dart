@@ -1,15 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 import 'package:flutter_application_2/screens/login_screen/components/forgetpassword.dart';
 import 'package:flutter_application_2/screens/login_screen/components/utils/constants.dart';
 import 'package:flutter_application_2/screens/login_screen/components/utils/helper_functions.dart';
 import 'package:flutter_application_2/slider.dart';
-
 import 'package:ionicons/ionicons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../animations/change_screen_animation.dart';
 import 'bottom_text.dart';
 import 'top_text.dart';
@@ -35,10 +32,9 @@ class _LoginContentState extends State<LoginContent>
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  String _errorMessage = ''; // Store error messages
+  String _errorMessage = '';
   bool _showPassword = false;
-  bool rememberMe = false; // Track the state of "Remember Me" checkbox
-
+  bool rememberMe = false;
   StreamController<bool> _errorMessageVisibilityController =
       StreamController<bool>();
 
@@ -52,7 +48,6 @@ class _LoginContentState extends State<LoginContent>
     super.dispose();
   }
 
-  // Input field widget
   Widget _inputField(
     String hint,
     IconData iconData,
@@ -86,8 +81,7 @@ class _LoginContentState extends State<LoginContent>
                       showPassword: _showPassword,
                       onChanged: (value) {
                         setState(() {
-                          _showPassword =
-                              value; // Update the _showPassword variable
+                          _showPassword = value;
                         });
                       },
                     )
@@ -103,7 +97,6 @@ class _LoginContentState extends State<LoginContent>
     );
   }
 
-  // Login button widget
   Widget loginButton(String title, {VoidCallback? onPressed}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 135, vertical: 16),
@@ -127,7 +120,6 @@ class _LoginContentState extends State<LoginContent>
     );
   }
 
-  // Divider between login and create account buttons
   Widget orDivider() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 130, vertical: 8),
@@ -153,13 +145,11 @@ class _LoginContentState extends State<LoginContent>
     );
   }
 
-  // Forgot password text widget
   Widget forgotPassword() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 110),
       child: TextButton(
         onPressed: () {
-          // Navigate to the forgot password screen
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const Forgetpass()),
@@ -181,10 +171,8 @@ class _LoginContentState extends State<LoginContent>
     try {
       await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
-      // Send verification email
       User? user = _auth.currentUser;
       await user?.sendEmailVerification();
-      // Show success message upon successful sign up
       setState(() {
         _errorMessage = "Sign up successful! Verification email sent.";
         _errorMessageVisibilityController.add(true);
@@ -193,7 +181,6 @@ class _LoginContentState extends State<LoginContent>
         _errorMessageVisibilityController.add(false);
       });
     } catch (e) {
-      // Handle sign up errors
       print("Sign up error: $e");
       setState(() {
         _errorMessage = _getErrorMessage(e);
@@ -208,13 +195,12 @@ class _LoginContentState extends State<LoginContent>
   Future<void> loginPressed(String email, String password) async {
     try {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
-      // Navigate to InitPage upon successful login
+      saveLoginState(true);
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => SliderPage()),
       );
     } catch (e) {
-      // Handle login errors
       print("Login error: $e");
       setState(() {
         _errorMessage = _getErrorMessage(e);
@@ -224,6 +210,11 @@ class _LoginContentState extends State<LoginContent>
         _errorMessageVisibilityController.add(false);
       });
     }
+  }
+
+  void saveLoginState(bool isLoggedIn) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('isLoggedIn', isLoggedIn);
   }
 
   String _getErrorMessage(dynamic error) {
@@ -249,7 +240,6 @@ class _LoginContentState extends State<LoginContent>
       _inputField('Password', Ionicons.lock_closed_outline, passwordController,
           isPassword: true),
       loginButton('Log In', onPressed: () {
-        // Implement login functionality
         loginPressed(emailController.text, passwordController.text);
       }),
       forgotPassword(),
@@ -261,7 +251,6 @@ class _LoginContentState extends State<LoginContent>
       _inputField('Password', Ionicons.lock_closed_outline, passwordController,
           isPassword: true),
       loginButton('Sign Up', onPressed: () {
-        // Implement sign up functionality
         signUpPressed(
             nameController.text, emailController.text, passwordController.text);
       }),
@@ -288,7 +277,6 @@ class _LoginContentState extends State<LoginContent>
       );
     }
 
-    // Initialize the "Remember Me" checkbox state from shared preferences
     loadRememberMeState();
   }
 
@@ -330,10 +318,9 @@ class _LoginContentState extends State<LoginContent>
             ],
           ),
         ),
-        // "Remember Me" checkbox
         Positioned(
-          top: 570, // Adjust the position as needed
-          left: 100, // Adjust the position as needed
+          top: 570,
+          left: 100,
           child: Row(
             children: [
               Checkbox(
@@ -342,8 +329,7 @@ class _LoginContentState extends State<LoginContent>
                   setState(() {
                     rememberMe = value ?? false;
                   });
-                  saveRememberMeState(
-                      rememberMe); // Save the state using shared preferences
+                  saveRememberMeState(rememberMe);
                 },
               ),
               Text(
@@ -364,7 +350,7 @@ class _LoginContentState extends State<LoginContent>
           ),
         ),
         Positioned(
-          bottom: 0, // Position the error message at the bottom of the screen
+          bottom: 0,
           left: 0,
           right: 0,
           child: StreamBuilder<bool>(
@@ -373,12 +359,10 @@ class _LoginContentState extends State<LoginContent>
             builder: (context, snapshot) {
               if (snapshot.data == true) {
                 return Container(
-                  padding: EdgeInsets.symmetric(
-                      vertical: 8), // Adjust padding as needed
+                  padding: EdgeInsets.symmetric(vertical: 8),
                   color: _errorMessage.contains('successful')
-                      ? Colors
-                          .green // Change background color to green if successful
-                      : Colors.red, // Change background color to red if error
+                      ? Colors.green
+                      : Colors.red,
                   child: Text(
                     _errorMessage,
                     style: TextStyle(
@@ -390,7 +374,7 @@ class _LoginContentState extends State<LoginContent>
                   ),
                 );
               } else {
-                return Container(); // Return empty container if error message is not visible
+                return Container();
               }
             },
           ),
@@ -424,8 +408,14 @@ class _PasswordVisibilityToggleState extends State<PasswordVisibilityToggle> {
         color: Colors.grey,
       ),
       onPressed: () {
-        widget.onChanged(!widget.showPassword); // Toggle the showPassword state
+        widget.onChanged(!widget.showPassword);
       },
     );
+  }
+
+  void saveLoginCredentials(String email, String password) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('email', email);
+    prefs.setString('password', password);
   }
 }

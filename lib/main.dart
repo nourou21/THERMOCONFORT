@@ -31,7 +31,9 @@ class MyApp extends StatelessWidget {
 
       debugShowCheckedModeBanner: false,
       theme: ThemeData.light(), // Commencez par le thème clair
-      home: LOGINN(),
+      home: LOGINN(
+        onLogin: (email, password) {},
+      ),
     );
   }
 }

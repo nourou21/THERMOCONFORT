@@ -10,6 +10,7 @@ import 'package:toggle_switch/toggle_switch.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:weather_icons/weather_icons.dart';
+import 'package:awesome_notifications/awesome_notifications.dart';
 
 bool isToggleVisible = false;
 
@@ -23,20 +24,30 @@ class _ThermostatPageState extends State<ThermostatPage>
   late AnimationController _controller;
   late Animation<Color?> _animation;
   bool isrelay = true;
-  String thermostatName = 'Thermoconfort';
+
   int readTemp = 0;
   int temperature = 0;
   bool isweatherVisible = parametter.isiswWathervisible();
   bool isweatherpressed = parametter.weatherpressed();
   int realWeather = parametter.getReadTemp();
   bool handButtonPressed = false;
-  bool isDarkMode = false;
+  bool is_dark_mode = parametter.getDarkMode();
+
+  String thermoscctatNamez = parametter.getThermostatName();
 
   Color backgroundColor = Colors.white;
 
   final databaseReference = FirebaseDatabase.instance.reference();
 
   late StreamSubscription temperatureSubscription;
+  //change mode
+  Color lightBackgroundColor = Colors.white;
+  Color lightTextColor = Colors.black;
+  Color lightIconColor = Colors.orange;
+  // Define colors for dark mode
+  Color darkBackgroundColor = Colors.grey.shade900;
+  Color darkTextColor = Colors.white;
+  Color darkIconColor = Colors.orange;
 
   @override
   void initState() {
@@ -71,10 +82,17 @@ class _ThermostatPageState extends State<ThermostatPage>
         setState(() {
           readTemp = value.toInt();
         });
+
+        // Check if temperature is -5°C
+        if (readTemp == -5) {
+          // Display emergency notification
+          showEmergencyNotification();
+        }
       } else {
         print('Invalid temperature value from the database');
       }
     });
+
     // Listen to changes in relay status
     databaseReference.child('project/relay').onValue.listen((event) {
       final dynamic value = event.snapshot.value;
@@ -130,39 +148,6 @@ class _ThermostatPageState extends State<ThermostatPage>
     });
   }
 
-  void changeThermostatName() async {
-    final TextEditingController controller = TextEditingController();
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Change Thermostat Name'),
-          content: TextField(
-            controller: controller,
-            decoration: InputDecoration(hintText: 'New Name'),
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  thermostatName = controller.text;
-                });
-                Navigator.pop(context);
-              },
-              child: Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   void changeBackgroundColor() {
     showDialog(
       context: context,
@@ -180,13 +165,6 @@ class _ThermostatPageState extends State<ThermostatPage>
         );
       },
     );
-  }
-
-  void toggleDarkMode() {
-    setState(() {
-      isDarkMode = !isDarkMode;
-      backgroundColor = isDarkMode ? Colors.black : Colors.white;
-    });
   }
 
   Future<void> fetchWeatherInformation(Position position) async {
@@ -319,6 +297,10 @@ class _ThermostatPageState extends State<ThermostatPage>
 
   @override
   Widget build(BuildContext context) {
+    Color backgroundColor =
+        is_dark_mode ? darkBackgroundColor : lightBackgroundColor;
+    Color textColor = is_dark_mode ? darkTextColor : lightTextColor;
+    Color iconColor = is_dark_mode ? darkIconColor : lightIconColor;
     return WillPopScope(
       onWillPop: () async => false,
       child: Scaffold(
@@ -356,7 +338,7 @@ class _ThermostatPageState extends State<ThermostatPage>
                                           ? WeatherIcons.day_cloudy
                                           : WeatherIcons.cloud,
                                   size: 50,
-                                  color: Colors.orange,
+                                  color: iconColor, // Use chosen icon color
                                 ),
                                 SizedBox(
                                   height: 5,
@@ -366,7 +348,7 @@ class _ThermostatPageState extends State<ThermostatPage>
                                   style: GoogleFonts.lato(
                                     fontSize: 20.0,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.black,
+                                    color: textColor, // Use chosen text color
                                   ),
                                 ),
                               ],
@@ -386,11 +368,13 @@ class _ThermostatPageState extends State<ThermostatPage>
                             child: SizedBox(
                               height: 120.0,
                               child: TyperAnimatedTextKit(
-                                text: [thermostatName],
-                                textStyle: GoogleFonts.indieFlower(
+                                text: [thermoscctatNamez],
+                                textStyle: GoogleFonts.lato(
+                                  // Using Lato font as an example
                                   textStyle: TextStyle(
-                                    color: Colors.black.withOpacity(0.5),
-                                    fontWeight: FontWeight.w300,
+                                    color:
+                                        const Color.fromARGB(255, 145, 87, 1),
+                                    fontWeight: FontWeight.bold,
                                     fontSize: 40,
                                   ),
                                 ),
@@ -475,7 +459,9 @@ class _ThermostatPageState extends State<ThermostatPage>
                           Stack(
                             children: [
                               Image.asset(
-                                'assets/phone.png', // Second image
+                                is_dark_mode
+                                    ? 'assets/phone_dark.png'
+                                    : 'assets/phone.png', // Second image
                                 width: 100,
                                 height: 100,
                               ),
@@ -504,14 +490,26 @@ class _ThermostatPageState extends State<ThermostatPage>
       ),
     );
   }
-}
 
-Color _getColorForTemperature(int temp) {
-  if (temp > 40) {
-    return Colors.red; // Hot
-  } else if (temp <= 5) {
-    return Colors.blue; // Cold
-  } else {
-    return Colors.black; // Normal
+  Color _getColorForTemperature(int temp) {
+    if (temp > 40) {
+      return Colors.red; // Hot
+    } else if (temp <= 5) {
+      return Colors.blue; // Cold
+    } else {
+      return Colors.black; // Normal
+    }
+  }
+
+  // Method to display an emergency notification
+  void showEmergencyNotification() async {
+    await AwesomeNotifications().createNotification(
+      content: NotificationContent(
+        id: 10,
+        channelKey: 'emergency_channel',
+        title: 'Emergency!',
+        body: 'Temperature has reached -5°C. Close the windows or the door.',
+      ),
+    );
   }
 }

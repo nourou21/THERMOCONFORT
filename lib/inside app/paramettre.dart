@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
+import 'package:toggle_switch/toggle_switch.dart';
 
 class parametter extends StatefulWidget {
   const parametter({Key? key}) : super(key: key);
@@ -22,12 +22,22 @@ class parametter extends StatefulWidget {
   static bool isiswWathervisible() {
     return _parametterState.isweatherVisible;
   }
+
+  static String getThermostatName() {
+    return _parametterState.thermostatName;
+  }
+
+  static bool getDarkMode() {
+    return _parametterState.is_dark_mode;
+  }
 }
 
 class _parametterState extends State<parametter> {
   static int readTemp = 2;
   static bool isweatherVisible = false;
   static bool isweatherpressed = false;
+  static String thermostatName = "Thermostat";
+  static bool is_dark_mode = false;
 
   @override
   void initState() {
@@ -42,22 +52,93 @@ class _parametterState extends State<parametter> {
         return false;
       },
       child: Scaffold(
+        backgroundColor: is_dark_mode ? Colors.grey.shade900 : Colors.white,
         body: Center(
           child: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                SizedBox(
+                  height: 20,
+                ),
                 ElevatedButton(
                   onPressed: () {},
                   child: const Text('Change Background Color'),
                 ),
-                ElevatedButton(
-                  onPressed: () {},
-                  child: const Text('Change Thermostat Name'),
+                SizedBox(
+                  height: 20,
                 ),
                 ElevatedButton(
-                  onPressed: () {},
-                  child: const Text('Toggle Dark Mode'),
+                  onPressed: () {
+                    _showChangeNameDialog(context);
+                  },
+                  child: const Text('Change Thermostat Name'),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                ToggleSwitch(
+                  minWidth: 120.0,
+                  cornerRadius: 20.0,
+                  initialLabelIndex: is_dark_mode ? 0 : 1,
+                  inactiveBgColor: Colors.grey[800]!,
+                  activeFgColor: Colors.white,
+                  inactiveFgColor: Colors.white,
+                  labels: ['moon', 'sun'],
+                  icons: [
+                    Icons.nightlight_round,
+                    Icons.wb_sunny,
+                  ],
+                  onToggle: (index) {
+                    setState(() {
+                      is_dark_mode = index == 0;
+                      if (is_dark_mode) {
+                        // Define your dark theme
+                        var darkTheme = ThemeData.dark().copyWith(
+                          // Define your dark theme properties here
+                          scaffoldBackgroundColor: Colors.black,
+                          // Example: Change background color to black
+                          // You can customize other properties as needed
+                          elevatedButtonTheme: ElevatedButtonThemeData(
+                            style: ButtonStyle(
+                              backgroundColor:
+                                  MaterialStateProperty.resolveWith<Color>(
+                                (states) {
+                                  return Colors.grey[
+                                      850]!; // Change button background color
+                                },
+                              ),
+                              foregroundColor:
+                                  MaterialStateProperty.resolveWith<Color>(
+                                (states) {
+                                  return Colors
+                                      .white; // Change button text color
+                                },
+                              ),
+                            ),
+                          ),
+                        );
+
+                        // Apply dark theme to MaterialApp
+                        MaterialApp(
+                          theme: darkTheme,
+                          home: parametter(),
+                          // Add other MaterialApp properties as needed
+                        );
+                      } else {
+                        // Restore to default theme (light mode)
+                        MaterialApp(
+                          theme:
+                              ThemeData.light(), // Set to default light theme
+                          home: parametter(),
+                          // Add other MaterialApp properties as needed
+                        );
+                      }
+                    });
+                  },
+                ),
+                SizedBox(
+                  height: 20,
                 ),
                 ElevatedButton(
                   onPressed: () async {
@@ -90,6 +171,49 @@ class _parametterState extends State<parametter> {
     );
   }
 
+  void _showChangeNameDialog(BuildContext context) {
+    TextEditingController controller = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Change Thermostat Name'),
+          content: TextField(
+            controller: controller,
+            decoration: InputDecoration(hintText: 'Enter new name'),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                String newName = controller.text;
+                if (newName.isNotEmpty) {
+                  setState(() {
+                    thermostatName = newName;
+                  });
+                  Navigator.pop(context);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Please enter a name'),
+                    ),
+                  );
+                }
+              },
+              child: Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> requestGPSActivation() async {
     bool serviceEnabled;
     LocationPermission permission;
@@ -108,7 +232,6 @@ class _parametterState extends State<parametter> {
                 onPressed: () async {
                   Navigator.pop(context);
                   await Geolocator.openLocationSettings();
-                  // Do not set isweatherVisible to true here
                 },
                 child: Text('Yes'),
               ),
@@ -142,7 +265,6 @@ class _parametterState extends State<parametter> {
                 onPressed: () async {
                   Navigator.pop(context);
                   await Geolocator.openAppSettings();
-                  // Do not set isweatherVisible to true here
                 },
                 child: Text('OK'),
               ),
@@ -162,13 +284,10 @@ class _parametterState extends State<parametter> {
       return;
     }
 
-    // If GPS is enabled and location permission is granted,
-    // set isweatherVisible to true to change the button color to green
     setState(() {
       isweatherVisible = true;
     });
 
-    // Request location and fetch weather information
     await requestLocationAndFetchWeather();
   }
 

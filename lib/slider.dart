@@ -26,6 +26,9 @@ class _SliderPageState extends State<SliderPage> {
 
   @override
   Widget build(BuildContext context) {
+    bool is_dark_mode =
+        parametter.getDarkMode(); // Retrieve dark mode state here
+
     return Scaffold(
       body: Container(
         child: Column(
@@ -49,12 +52,12 @@ class _SliderPageState extends State<SliderPage> {
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: _buildPageIndicator(),
             ),
           ],
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: is_dark_mode ? Colors.grey : Colors.white,
         currentIndex: _currentIndex,
         onTap: (index) {
           setState(() {
@@ -86,53 +89,41 @@ class _SliderPageState extends State<SliderPage> {
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: IconButton(
-              onPressed: () {
-                _pageController.jumpToPage(1);
-                setState(() {
-                  isToggleVisible = !isToggleVisible; // Toggle the visibility
-                });
-              },
-              icon: Icon(
-                MdiIcons.thumbsUpDownOutline,
-                size: 30,
+            icon: Padding(
+              padding:
+                  EdgeInsets.symmetric(vertical: 1), // Adjust vertical padding
+              child: IconButton(
+                onPressed: () {
+                  _pageController.jumpToPage(1);
+                  setState(() {
+                    isToggleVisible = !isToggleVisible; // Toggle the visibility
+                  });
+                },
+                icon: Icon(
+                  MdiIcons.thumbsUpDownOutline,
+                  size: 26, // Reduce the icon size
+                ),
               ),
             ),
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: IconButton(
-              onPressed: () {
-                _pageController.jumpToPage(2);
-              },
-              icon: Icon(
-                Icons.settings_suggest_outlined,
-                size: 40,
+            icon: Padding(
+              padding:
+                  EdgeInsets.symmetric(vertical: 6), // Adjust vertical padding
+              child: IconButton(
+                onPressed: () {
+                  _pageController.jumpToPage(2);
+                },
+                icon: Icon(
+                  Icons.settings_suggest_outlined,
+                  size: 36, // Adjust the icon size
+                ),
               ),
             ),
             label: '',
           ),
         ],
-      ),
-    );
-  }
-
-  List<Widget> _buildPageIndicator() {
-    return List.generate(
-      3,
-      (index) => _indicator(index == _currentIndex),
-    );
-  }
-
-  Widget _indicator(bool isActive) {
-    return AnimatedContainer(
-      duration: Duration(milliseconds: 150),
-      margin: EdgeInsets.symmetric(horizontal: 8.0),
-      height: 8.0,
-      width: isActive ? 24.0 : 16.0,
-      decoration: BoxDecoration(
-        color: isActive ? Colors.purple : Colors.brown,
-        borderRadius: BorderRadius.circular(12),
       ),
     );
   }
