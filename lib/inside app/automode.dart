@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter_application_2/inside%20app/Thermostat.dart';
+import 'package:flutter_application_2/inside%20app/paramettre.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:toggle_switch/toggle_switch.dart';
@@ -26,18 +27,22 @@ class _modeautoState extends State<modeauto>
 
   int readTemp = 0;
   int temperature = 0;
+  bool isDarkMode = parametter.getDarkMode();
   bool isWeatherVisible = false;
   bool isWeatherPressed = false;
-  int realWeather = 0;
+  int realWeather = parametter.getReadTemp();
+  bool isweatherVisible = parametter.isiswWathervisible();
   bool handButtonPressed = false;
-  bool isDarkMode = false;
+
   String thermoscctatNamez = "";
+  bool isweatherpressed = parametter.weatherpressed();
 
   Color backgroundColor = Colors.white;
 
   final databaseReference = FirebaseDatabase.instance.reference();
 
   late StreamSubscription temperatureSubscription;
+  //color for
 
   // Define colors for light mode
   Color lightBackgroundColor = Colors.white;
@@ -62,6 +67,7 @@ class _modeautoState extends State<modeauto>
     _controller.forward();
     listenToTemperatureChanges();
     listenToTemperatureConsigne();
+    fetchWeatherData(); // Fetch weather data on init
   }
 
   @override
@@ -112,6 +118,20 @@ class _modeautoState extends State<modeauto>
     // Your existing code to listen to temperature consigne
   }
 
+  void fetchWeatherData() async {
+    // Fetch weather data from API
+    final response = await http.get(Uri.parse('API_ENDPOINT_HERE'));
+    if (response.statusCode == 200) {
+      final weatherData = json.decode(response.body);
+      setState(() {
+        realWeather = weatherData['main']['temp']; // Update weather data
+        isWeatherVisible = true; // Show weather
+      });
+    } else {
+      print('Failed to fetch weather data');
+    }
+  }
+
   void sendVacationModeToDatabase(bool isVacationMode) {
     // Send the vacation mode value to the database
     databaseReference
@@ -135,12 +155,11 @@ class _modeautoState extends State<modeauto>
                 constraints: BoxConstraints(),
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 10.0),
+                  height: MediaQuery.of(context).size.height,
                   alignment: Alignment.center,
                   color: backgroundColor,
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      SizedBox(height: 34),
                       Row(
                         children: [
                           IconButton(
@@ -149,40 +168,77 @@ class _modeautoState extends State<modeauto>
                               Navigator.pop(context);
                             },
                           ),
+                          Row(
+                            children: [
+                              SizedBox(
+                                width: isweatherpressed ? 230 : 0,
+                              ),
+                              Column(
+                                children: [
+                                  SizedBox(
+                                    height: 80,
+                                  ),
+                                  Visibility(
+                                    visible: isweatherVisible,
+                                    child: Column(
+                                      children: [
+                                        Icon(
+                                          // Choose weather icon based on temperature
+                                          realWeather >= 25
+                                              ? WeatherIcons.day_sunny
+                                              : realWeather >= 15
+                                                  ? WeatherIcons.day_cloudy
+                                                  : WeatherIcons.cloud,
+                                          size: 50,
+                                          color:
+                                              iconColor, // Use chosen icon color
+                                        ),
+                                        Text(
+                                          'Its : $realWeather°C',
+                                          style: GoogleFonts.lato(
+                                            fontSize: 20.0,
+                                            fontWeight: FontWeight.bold,
+                                            color:
+                                                textColor, // Use chosen text color
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                       SizedBox(height: 1),
-                      Row(
-                        children: [
-                          SizedBox(
-                            width: isWeatherPressed ? 260 : 0,
-                          ),
-                          Visibility(
-                            visible: isWeatherVisible,
-                            child: Column(
-                              children: [
-                                Icon(
-                                  realWeather >= 25
-                                      ? WeatherIcons.day_sunny
-                                      : realWeather >= 15
-                                          ? WeatherIcons.day_cloudy
-                                          : WeatherIcons.cloud,
-                                  size: 50,
-                                  color: iconColor,
-                                ),
-                                SizedBox(height: 5),
-                                Text(
-                                  'It\'s : $temperature°C',
-                                  style: GoogleFonts.lato(
-                                    fontSize: 20.0,
-                                    fontWeight: FontWeight.bold,
-                                    color: textColor,
-                                  ),
-                                ),
-                              ],
+                      Visibility(
+                        visible: isWeatherVisible, // Show weather if visible
+                        child: Column(
+                          children: [
+                            Icon(
+                              // Choose weather icon based on temperature
+                              realWeather >= 25
+                                  ? WeatherIcons.day_sunny
+                                  : realWeather >= 15
+                                      ? WeatherIcons.day_cloudy
+                                      : WeatherIcons.cloud,
+                              size: 50,
+                              color: iconColor, // Use chosen icon color
                             ),
-                          ),
-                        ],
+                            SizedBox(
+                              height: 5,
+                            ),
+                            Text(
+                              'It\'s : $realWeather°C',
+                              style: GoogleFonts.lato(
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold,
+                                color: textColor, // Use chosen text color
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                       SizedBox(height: 40),
                       Row(
@@ -285,7 +341,7 @@ class _modeautoState extends State<modeauto>
                           ),
                         ],
                       ),
-                      SizedBox(height: 100.0),
+                      SizedBox(height: 130.0),
                       Row(
                         children: [
                           SizedBox(width: 270),

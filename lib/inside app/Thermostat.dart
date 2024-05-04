@@ -130,10 +130,6 @@ class _ThermostatPageState extends State<ThermostatPage>
     });
   }
 
-  void sendVacationModeToDatabase(bool isVacationMode) {
-    databaseReference.child('project/vacation_mode').set(isVacationMode);
-  }
-
   void incrementTemperature() {
     setState(() {
       temperature += 1;
@@ -313,6 +309,11 @@ class _ThermostatPageState extends State<ThermostatPage>
                 ),
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 20.0),
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context)
+                      .size
+                      .height, // Set height to screen height
+
                   alignment: Alignment.center,
                   color: backgroundColor,
                   child: Column(
@@ -324,7 +325,7 @@ class _ThermostatPageState extends State<ThermostatPage>
                       Row(
                         children: [
                           SizedBox(
-                            width: isweatherpressed ? 230 : 0,
+                            width: isweatherpressed ? 265 : 0,
                           ),
                           Visibility(
                             visible: isweatherVisible,
@@ -419,7 +420,6 @@ class _ThermostatPageState extends State<ThermostatPage>
                             }
 
                             // Send the updated mode to the database
-                            sendVacationModeToDatabase(handButtonPressed);
                           },
                         ),
                       ),
@@ -457,7 +457,7 @@ class _ThermostatPageState extends State<ThermostatPage>
                       Row(
                         children: [
                           SizedBox(
-                            width: 80,
+                            width: 90,
                           ),
                           Text(
                             '$readTemp°C',
