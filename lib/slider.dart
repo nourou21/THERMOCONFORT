@@ -11,12 +11,24 @@ class SliderPage extends StatefulWidget {
 
   @override
   _SliderPageState createState() => _SliderPageState();
+
+  // Static method to access _pageController from outside
+  static PageController getPageController() {
+    return _SliderPageState._pageController;
+  }
 }
 
 class _SliderPageState extends State<SliderPage> {
   int _currentIndex = 0;
 
-  final PageController _pageController = PageController();
+  // Declaring _pageController as static
+  static late PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
 
   @override
   void dispose() {
@@ -36,6 +48,8 @@ class _SliderPageState extends State<SliderPage> {
             Expanded(
               child: PageView(
                 controller: _pageController,
+                // Allow scrolling
+                physics: AlwaysScrollableScrollPhysics(),
                 onPageChanged: (index) {
                   setState(() {
                     _currentIndex = index;
@@ -44,9 +58,8 @@ class _SliderPageState extends State<SliderPage> {
                 children: [
                   Container(child: GraphPage()),
                   Container(child: ThermostatPage()),
-                  Container(
-                    child: Container(child: parametter()),
-                  ),
+                  Container(child: parametter()),
+                  Container(child: parametter()),
                 ],
               ),
             ),
