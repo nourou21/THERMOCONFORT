@@ -81,7 +81,7 @@ class _SliderPageState extends State<SliderPage> {
                 _pageController.jumpToPage(0);
               },
               icon: Image.asset(
-                'assets/GRAPHE.png',
+                'assets/graphdark.png',
                 width: 36,
                 height: 36,
               ),
@@ -101,7 +101,7 @@ class _SliderPageState extends State<SliderPage> {
                 },
                 icon: Icon(
                   MdiIcons.thumbsUpDownOutline,
-                  size: 26, // Reduce the icon size
+                  size: 30, // Reduce the icon size
                 ),
               ),
             ),

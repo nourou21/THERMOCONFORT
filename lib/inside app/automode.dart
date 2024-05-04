@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:flutter_application_2/inside%20app/Thermostat.dart';
 import 'package:flutter_application_2/inside%20app/automode.dart';
 import 'package:flutter_application_2/inside%20app/graph.dart';
 import 'package:flutter_application_2/inside%20app/paramettre.dart';
@@ -15,12 +16,12 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 
 bool isToggleVisible = false;
 
-class ThermostatPage extends StatefulWidget {
+class modeauto extends StatefulWidget {
   @override
-  _ThermostatPageState createState() => _ThermostatPageState();
+  _modeautoState createState() => _modeautoState();
 }
 
-class _ThermostatPageState extends State<ThermostatPage>
+class _modeautoState extends State<modeauto>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<Color?> _animation;
@@ -367,7 +368,7 @@ class _ThermostatPageState extends State<ThermostatPage>
                               color: _animation.value,
                             ),
                             child: SizedBox(
-                              height: 80.0,
+                              height: 120.0,
                               child: TyperAnimatedTextKit(
                                 text: [thermoscctatNamez],
                                 textStyle: GoogleFonts.lato(
@@ -387,6 +388,7 @@ class _ThermostatPageState extends State<ThermostatPage>
                           ),
                         ],
                       ),
+                      SizedBox(height: 1.0),
                       Visibility(
                         visible: isToggleVisible,
                         child: ToggleSwitch(
@@ -408,7 +410,7 @@ class _ThermostatPageState extends State<ThermostatPage>
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => modeauto()),
+                                      builder: (context) => ThermostatPage()),
                                 );
                               }
                             });
@@ -422,15 +424,15 @@ class _ThermostatPageState extends State<ThermostatPage>
                         onTap: incrementTemperature,
                         child: Image.asset(
                           'assets/UP.png',
-                          width: 100.0,
-                          height: 100.0,
+                          width: 65.0,
+                          height: 65.0,
                         ),
                       ),
                       SizedBox(height: 20.0),
                       Text(
                         '$temperature°C',
                         style: TextStyle(
-                          fontSize: 50.0,
+                          fontSize: 35.0,
                           color: Color(0xFFB97A57),
                         ),
                         textAlign: TextAlign.center,
@@ -440,8 +442,8 @@ class _ThermostatPageState extends State<ThermostatPage>
                         onTap: decrementTemperature,
                         child: Image.asset(
                           'assets/DOWN.png',
-                          width: 100.0,
-                          height: 100.0,
+                          width: 65.0,
+                          height: 65.0,
                         ),
                       ),
                       SizedBox(height: 20.0),
@@ -467,7 +469,9 @@ class _ThermostatPageState extends State<ThermostatPage>
                           Stack(
                             children: [
                               Image.asset(
-                                'assets/phone_dark.png',
+                                is_dark_mode
+                                    ? 'assets/phone_dark.png'
+                                    : 'assets/phone.png', // Second image
                                 width: 100,
                                 height: 100,
                               ),
@@ -503,7 +507,7 @@ class _ThermostatPageState extends State<ThermostatPage>
     } else if (temp <= 5) {
       return Colors.blue; // Cold
     } else {
-      return Color.fromRGBO(184, 122, 90, 1.0);
+      return Colors.black; // Normal
     }
   }
 
