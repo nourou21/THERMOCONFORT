@@ -1,0 +1,97 @@
+#include <SPI.h>
+#include <LoRa.h>
+#include <Arduino.h>
+#include <WiFi.h>
+#include <Firebase_ESP_Client.h>
+
+// WiFi credentials
+#define WIFI_SSID "IdoomFibre_ATJ2Kc64G"
+#define WIFI_PASSWORD "X5z5tV4n"
+
+// Firebase credentials
+#define API_KEY "AIzaSyByPqqFZT-fsyzsdKYrid0uQf92kswep9I"
+#define DATABASE_URL "https://hichampfc-e4e18-default-rtdb.firebaseio.com/"
+#define USER_EMAIL "saithichem@gmail.com"
+#define USER_PASSWORD "12345678"
+
+// Firebase paths
+#define PROCESS_PATH "/project/start_the_process"
+#define NTU_PATH "/project/sensor"
+
+FirebaseData fbdo;
+FirebaseAuth auth;
+FirebaseConfig config;
+
+const int csPin = 5;
+const int resetPin = 14;
+const int irqPin = 4;
+int SyncWord = 0x22;
+
+bool sentStartCommand = false;
+
+void setup() {
+  Serial.begin(115200);
+  Serial.println("LoRa Full Duplex");
+
+  // Initialize LoRa module
+  LoRa.setPins(csPin, resetPin, irqPin);
+  if (!LoRa.begin(433E6)) {
+    Serial.println("Starting LoRa failed!");
+    while (1);
+  }
+
+  // Connect to WiFi
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(300);
+  }
+
+  // Connect to Firebase
+  config.api_key = API_KEY;
+  auth.user.email = USER_EMAIL;
+  auth.user.password = USER_PASSWORD;
+  config.database_url = DATABASE_URL;
+  Firebase.reconnectNetwork(true);
+  Firebase.begin(&config, &auth);
+  LoRa.setSyncWord(SyncWord);  // Sync word must be the same as sender's
+}
+
+
+void loop() {
+  if (!sentStartCommand) {
+    // Send "start the process" message
+    String sendData = "start the process";
+    LoRa.beginPacket();
+    LoRa.print(sendData);
+    LoRa.endPacket();
+    Serial.println("Sent start command");
+    sentStartCommand = true;
+  } else {
+    // Check for incoming LoRa packets
+    int packetSize = LoRa.parsePacket();
+    if (packetSize) {
+      String received = "";
+
+      // Read packet data
+      while (LoRa.available()) {
+        received += (char)LoRa.read();
+      }
+
+      Serial.print("Received packet: ");
+      Serial.println(received);
+      sendDataToFirebase(received);
+
+      // Process received packet (if needed)
+    }
+  }
+}
+
+void sendDataToFirebase(String data) {
+  if (Firebase.RTDB.setString(&fbdo, NTU_PATH, data)) {
+    Serial.println("Data sent to Firebase");
+  } else {
+    Serial.println("Failed to send data to Firebase");
+  }
+}
+
+//void getData(String Get_Data){}

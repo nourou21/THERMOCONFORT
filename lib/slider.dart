@@ -59,7 +59,6 @@ class _SliderPageState extends State<SliderPage> {
                   Container(child: GraphPage()),
                   Container(child: ThermostatPage()),
                   Container(child: parametter()),
-                  Container(child: parametter()),
                 ],
               ),
             ),

@@ -3,9 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter_application_2/inside%20app/automode.dart';
-import 'package:flutter_application_2/inside%20app/graph.dart';
 import 'package:flutter_application_2/inside%20app/paramettre.dart';
-import 'package:flutter_application_2/slider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:toggle_switch/toggle_switch.dart';
@@ -402,14 +400,25 @@ class _ThermostatPageState extends State<ThermostatPage>
                           ],
                           initialLabelIndex: handButtonPressed ? 0 : 1,
                           onToggle: (index) {
-                            setState(() {
-                              handButtonPressed = index == 0;
-                              if (handButtonPressed) {
-                                // Navigate to auto mode page if index is 0 (AUTO mode)
-                                SliderPage.getPageController().jumpToPage(3);
-                              }
-                            });
+                            if (index == 0) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => modeauto(),
+                                ),
+                              ).then((value) {
+                                setState(() {
+                                  handButtonPressed =
+                                      false; // Update to manual mode after returning from auto mode
+                                });
+                              });
+                            } else {
+                              setState(() {
+                                handButtonPressed = true; // Set to manual mode
+                              });
+                            }
 
+                            // Send the updated mode to the database
                             sendVacationModeToDatabase(handButtonPressed);
                           },
                         ),
