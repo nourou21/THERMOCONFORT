@@ -72,7 +72,40 @@ class _modeautoState extends State<modeauto>
   }
 
   void listenToTemperatureChanges() {
-    // Your existing code to listen to temperature changes
+    databaseReference
+        .child('project/temperature ambainte')
+        .onValue
+        .listen((event) {
+      final dynamic value = event.snapshot.value;
+      if (value is double || value is int) {
+        setState(() {
+          readTemp = value.toInt();
+        });
+
+        // Check if temperature is -5°C
+        if (readTemp == -5) {
+          // Display emergency notification
+        }
+      } else {
+        print('Invalid temperature value from the database');
+      }
+    });
+
+    // Listen to changes in relay status
+    databaseReference.child('project/relay').onValue.listen((event) {
+      final dynamic value = event.snapshot.value;
+      if (value == 'on') {
+        // If relay is on, show the fire image
+        setState(() {
+          isRelay = true;
+        });
+      } else {
+        // If relay is off, hide the fire image
+        setState(() {
+          isRelay = false;
+        });
+      }
+    });
   }
 
   void listenToTemperatureConsigne() {
@@ -139,7 +172,7 @@ class _modeautoState extends State<modeauto>
                                 ),
                                 SizedBox(height: 5),
                                 Text(
-                                  'It\'s : $realWeather°C',
+                                  'It\'s : $temperature°C',
                                   style: GoogleFonts.lato(
                                     fontSize: 20.0,
                                     fontWeight: FontWeight.bold,
