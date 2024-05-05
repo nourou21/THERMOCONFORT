@@ -5,6 +5,8 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_2/inside%20app/automode.dart';
 import 'package:flutter_application_2/inside%20app/paramettre.dart';
+import 'package:flutter_application_2/screens/login_screen/components/login_content.dart';
+import 'package:flutter_application_2/screens/login_screen/login_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:toggle_switch/toggle_switch.dart';
@@ -12,6 +14,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:weather_icons/weather_icons.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 bool isToggleVisible = false;
 
@@ -319,6 +322,32 @@ class _ThermostatPageState extends State<ThermostatPage>
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
+                      Row(
+                        children: [
+                          ElevatedButton(
+                            onPressed: () async {
+                              try {
+                                await FirebaseAuth.instance.signOut();
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => LOGINN()),
+                                );
+                              } catch (e) {
+                                print('Sign out error: $e');
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  Colors.red, // Make the button red
+                            ),
+                            child: const Text(
+                              'Sign Out',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ],
+                      ),
                       Row(
                         children: [
                           SizedBox(
