@@ -40,18 +40,14 @@ class GraphPage extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          Text("jello"),
-                          SizedBox(width: 10),
-                        ],
-                      ),
-                      Row(
-                        children: [
                           SizedBox(width: 1),
                           Expanded(
                             child: DefaultTextStyle(
                               style: GoogleFonts.indieFlower(
                                 textStyle: TextStyle(
-                                  color: Colors.black.withOpacity(0.5),
+                                  color: is_dark_mode
+                                      ? Colors.white
+                                      : Colors.black.withOpacity(0.5),
                                   fontWeight: FontWeight.w300,
                                   fontSize: 40,
                                 ),
@@ -72,7 +68,22 @@ class GraphPage extends StatelessWidget {
                       SizedBox(height: 20),
                       // Add the chart widget here
                       SfCartesianChart(
-                        primaryXAxis: CategoryAxis(),
+                        primaryXAxis: CategoryAxis(
+                          labelStyle: TextStyle(
+                            color: is_dark_mode
+                                ? Colors.white
+                                : Colors
+                                    .black, // Adjust color based on dark mode
+                          ),
+                        ),
+                        primaryYAxis: NumericAxis(
+                          labelStyle: TextStyle(
+                            color: is_dark_mode
+                                ? Colors.white
+                                : Colors
+                                    .black, // Adjust color based on dark mode
+                          ),
+                        ),
                         series: [
                           // Renders line chart
                           LineSeries<SalesData, String>(
