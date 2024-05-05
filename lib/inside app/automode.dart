@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_application_2/inside%20app/Thermostat.dart';
 import 'package:flutter_application_2/inside%20app/paramettre.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -141,6 +142,7 @@ class _modeautoState extends State<modeauto>
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
     Color backgroundColor =
         isDarkMode ? darkBackgroundColor : lightBackgroundColor;
     Color textColor = isDarkMode ? darkTextColor : lightTextColor;
@@ -333,7 +335,6 @@ class _modeautoState extends State<modeauto>
                             onPressed: () {
                               setState(() {
                                 handButtonPressed = !handButtonPressed;
-                                isDarkMode = false; // Turn off night mode
                               });
 
                               sendVacationModeToDatabase(handButtonPressed);

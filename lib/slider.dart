@@ -76,7 +76,7 @@ class _SliderPageState extends State<SliderPage> {
             _currentIndex = index;
             _pageController.animateToPage(
               index,
-              duration: Duration(milliseconds: 500),
+              duration: Duration(milliseconds: 100),
               curve: Curves.ease,
             );
 

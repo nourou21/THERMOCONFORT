@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_application_2/inside%20app/automode.dart';
 import 'package:flutter_application_2/inside%20app/paramettre.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -293,6 +294,7 @@ class _ThermostatPageState extends State<ThermostatPage>
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
     Color backgroundColor =
         is_dark_mode ? darkBackgroundColor : lightBackgroundColor;
     Color textColor = is_dark_mode ? darkTextColor : lightTextColor;
@@ -304,9 +306,7 @@ class _ThermostatPageState extends State<ThermostatPage>
           builder: (BuildContext context, BoxConstraints constraints) {
             return SingleChildScrollView(
               child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight,
-                ),
+                constraints: BoxConstraints(),
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 20.0),
                   width: MediaQuery.of(context).size.width,
@@ -319,9 +319,6 @@ class _ThermostatPageState extends State<ThermostatPage>
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      SizedBox(
-                        height: 30,
-                      ),
                       Row(
                         children: [
                           SizedBox(
