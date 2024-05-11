@@ -13,7 +13,7 @@ class GraphPage extends StatelessWidget {
 
     // Sample data for the chart
     List<SalesData> chartData = [
-      SalesData('Jan', 35),
+      SalesData('Jan', 37),
       SalesData('Feb', 28),
       SalesData('Mar', 34),
       SalesData('Apr', 32),
