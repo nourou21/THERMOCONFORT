@@ -15,12 +15,12 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 
 bool isToggleVisible = false;
 
-class modeauto extends StatefulWidget {
+class ModeAuto extends StatefulWidget {
   @override
-  _modeautoState createState() => _modeautoState();
+  _ModeAutoState createState() => _ModeAutoState();
 }
 
-class _modeautoState extends State<modeauto>
+class _ModeAutoState extends State<ModeAuto>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<Color?> _animation;
@@ -32,11 +32,12 @@ class _modeautoState extends State<modeauto>
   bool isWeatherVisible = false;
   bool isWeatherPressed = false;
   int realWeather = parametter.getReadTemp();
-  bool isweatherVisible = parametter.isiswWathervisible();
+
   bool handButtonPressed = false;
+  bool isNightMode = false; // Add this variable for night mode
+  bool isVacationMode = false; // Initialize vacation mode variable
 
   String thermoscctatNamez = "";
-  bool isweatherpressed = parametter.weatherpressed();
 
   Color backgroundColor = Colors.white;
 
@@ -69,6 +70,7 @@ class _modeautoState extends State<modeauto>
     listenToTemperatureChanges();
     listenToTemperatureConsigne();
     fetchWeatherData(); // Fetch weather data on init
+    fetchInitialModeFromDatabase(); // Fetch initial mode settings
   }
 
   @override
@@ -133,6 +135,19 @@ class _modeautoState extends State<modeauto>
     }
   }
 
+  void fetchInitialModeFromDatabase() {
+    // Fetch initial mode settings from the database
+    databaseReference
+        .child('project/vacation_mode')
+        .once()
+        .then((DatabaseEvent event) {
+      final value = event.snapshot.value;
+      setState(() {
+        isVacationMode = value == 'on'; // Update vacation mode state
+      });
+    });
+  }
+
   void sendVacationModeToDatabase(bool isVacationMode) {
     // Send the vacation mode value to the database
     databaseReference
@@ -173,7 +188,7 @@ class _modeautoState extends State<modeauto>
                           Row(
                             children: [
                               SizedBox(
-                                width: isweatherpressed ? 230 : 0,
+                                width: isWeatherPressed ? 230 : 0,
                               ),
                               Column(
                                 children: [
@@ -181,7 +196,7 @@ class _modeautoState extends State<modeauto>
                                     height: 80,
                                   ),
                                   Visibility(
-                                    visible: isweatherVisible,
+                                    visible: isWeatherVisible,
                                     child: Column(
                                       children: [
                                         Icon(
@@ -213,7 +228,6 @@ class _modeautoState extends State<modeauto>
                           ),
                         ],
                       ),
-                      SizedBox(height: 1),
                       Visibility(
                         visible: isWeatherVisible, // Show weather if visible
                         child: Column(
@@ -228,9 +242,6 @@ class _modeautoState extends State<modeauto>
                               size: 50,
                               color: iconColor, // Use chosen icon color
                             ),
-                            SizedBox(
-                              height: 5,
-                            ),
                             Text(
                               'It\'s : $realWeather°C',
                               style: GoogleFonts.lato(
@@ -242,7 +253,7 @@ class _modeautoState extends State<modeauto>
                           ],
                         ),
                       ),
-                      SizedBox(height: 40),
+                      SizedBox(height: 10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -251,7 +262,7 @@ class _modeautoState extends State<modeauto>
                               color: _animation.value,
                             ),
                             child: SizedBox(
-                              height: 120.0,
+                              height: 40.0,
                               child: TyperAnimatedTextKit(
                                 text: [thermoscctatNamez],
                                 textStyle: GoogleFonts.lato(
@@ -268,6 +279,20 @@ class _modeautoState extends State<modeauto>
                               ),
                             ),
                           ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          SizedBox(
+                            width: 240,
+                          ),
+                          if (isNightMode &&
+                              !isVacationMode) // Conditionally render zzz icon if it's night mode and not in vacation mode
+                            Image.asset(
+                              'assets/zzz.png',
+                              width: 90,
+                              height: 90,
+                            ),
                         ],
                       ),
                       SizedBox(height: 1.0),
@@ -297,61 +322,75 @@ class _modeautoState extends State<modeauto>
                           },
                         ),
                       ),
-                      SizedBox(height: 40.0),
-                      Text(
-                        '$readTemp°C',
-                        style: TextStyle(
-                          fontSize: 35.0,
-                          color: _getColorForTemperature(readTemp),
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      SizedBox(height: 30.0),
+                      Stack(
                         children: [
-                          ElevatedButton(
-                            child: Text('Night Mode'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: !handButtonPressed
-                                  ? Colors.green
-                                  : Colors.grey,
+                          if (isNightMode) // Conditionally render moon icon if night mode is true
+                            Row(
+                              children: [
+                                SizedBox(
+                                  width: 90,
+                                ),
+                                Image.asset(
+                                  'assets/moon.png',
+                                  width: 120,
+                                  height: 120,
+                                ),
+                              ],
                             ),
-                            onPressed: () {
-                              setState(() {
-                                handButtonPressed =
-                                    false; // Turn off vacation mode
-                              });
-                              sendVacationModeToDatabase(handButtonPressed);
-                            },
+                          SizedBox(
+                            height: 90,
                           ),
-                          SizedBox(width: 20),
-                          ElevatedButton(
-                            child: Text('Vacation Mode'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: handButtonPressed
-                                  ? Colors.green
-                                  : Colors.grey,
+                          Row(
+                            children: [
+                              SizedBox(
+                                width: 155,
+                              ),
+                              Text(
+                                '$readTemp°C',
+                                style: TextStyle(
+                                  fontSize: 50.0,
+                                  color: _getColorForTemperature(readTemp),
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                          Positioned(
+                            top: 0,
+                            right: 90,
+                            left: 0,
+                            bottom:
+                                0, // Add bottom value to ensure full visibility
+                            child: Column(
+                              children: [
+                                SizedBox(
+                                  height: 5,
+                                ),
+                              ],
                             ),
-                            onPressed: () {
-                              setState(() {
-                                handButtonPressed = !handButtonPressed;
-                              });
-
-                              sendVacationModeToDatabase(handButtonPressed);
-                            },
                           ),
                         ],
                       ),
-                      SizedBox(height: 130.0),
+                      SizedBox(
+                        height: 30,
+                      ),
                       Row(
                         children: [
-                          SizedBox(width: 270),
+                          SizedBox(width: 130),
                           Stack(
                             children: [
-                              Image.asset(
-                                "assets/phone_dark.png",
-                                width: 100,
-                                height: 100,
+                              Column(
+                                children: [
+                                  SizedBox(
+                                    height: 30,
+                                  ),
+                                  Image.asset(
+                                    "assets/phone_dark.png",
+                                    width: 100,
+                                    height: 100,
+                                  ),
+                                ],
                               ),
                               Positioned(
                                 top: 20,
@@ -365,6 +404,68 @@ class _modeautoState extends State<modeauto>
                                     : SizedBox(),
                               ),
                             ],
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 90,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: 160, // Adjust the width as needed
+                            height: 90, // Adjust the height as needed
+                            child: ElevatedButton(
+                              child: Text('Night Mode',
+                                  style: TextStyle(
+                                      fontSize:
+                                          18)), // Adjust font size as needed
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: !handButtonPressed
+                                    ? Colors.green
+                                    : Colors.grey,
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 10), // Adjust vertical padding
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  handButtonPressed =
+                                      false; // Turn off vacation mode
+                                  isNightMode = true; // Activate night mode
+                                  isVacationMode =
+                                      false; // Deactivate vacation mode
+                                });
+                                sendVacationModeToDatabase(handButtonPressed);
+                              },
+                            ),
+                          ),
+                          SizedBox(width: 20), // Add spacing between buttons
+                          SizedBox(
+                            width: 160, // Adjust the width as needed
+                            height: 90, // Adjust the height as needed
+                            child: ElevatedButton(
+                              child: Text('Vacation Mode',
+                                  style: TextStyle(
+                                      fontSize:
+                                          18)), // Adjust font size as needed
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: handButtonPressed
+                                    ? Colors.green
+                                    : Colors.grey,
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 10), // Adjust vertical padding
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  handButtonPressed = !handButtonPressed;
+                                  isNightMode = false; // Deactivate night mode
+                                  isVacationMode =
+                                      handButtonPressed; // Set vacation mode accordingly
+                                });
+                                sendVacationModeToDatabase(handButtonPressed);
+                              },
+                            ),
                           ),
                         ],
                       ),

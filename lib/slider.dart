@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_2/inside%20app/Thermostat.dart';
+import 'package:flutter_application_2/inside%20app/automode.dart';
 import 'package:flutter_application_2/inside%20app/graph.dart';
 import 'package:flutter_application_2/inside%20app/paramettre.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
-import 'package:iconly/iconly.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 class SliderPage extends StatefulWidget {
@@ -11,18 +11,11 @@ class SliderPage extends StatefulWidget {
 
   @override
   _SliderPageState createState() => _SliderPageState();
-
-  // Static method to access _pageController from outside
-  static PageController getPageController() {
-    return _SliderPageState._pageController;
-  }
 }
 
 class _SliderPageState extends State<SliderPage> {
   int _currentIndex = 0;
-
-  // Declaring _pageController as static
-  static late PageController _pageController;
+  late PageController _pageController;
 
   @override
   void initState() {
@@ -38,38 +31,31 @@ class _SliderPageState extends State<SliderPage> {
 
   @override
   Widget build(BuildContext context) {
-    bool is_dark_mode =
-        parametter.getDarkMode(); // Retrieve dark mode state here
+    bool isDarkMode = parametter.getDarkMode(); // Retrieve dark mode state here
 
     return Scaffold(
-      body: Container(
-        child: Column(
-          children: [
-            Expanded(
-              child: PageView(
-                controller: _pageController,
-                // Allow scrolling
-                physics: AlwaysScrollableScrollPhysics(),
-                onPageChanged: (index) {
-                  setState(() {
-                    _currentIndex = index;
-                  });
-                },
-                children: [
-                  Container(child: GraphPage()),
-                  Container(child: ThermostatPage()),
-                  Container(child: parametter()),
-                ],
-              ),
+      body: Column(
+        children: [
+          Expanded(
+            child: PageView(
+              controller: _pageController,
+              physics: AlwaysScrollableScrollPhysics(), // Allow scrolling
+              onPageChanged: (index) {
+                setState(() {
+                  _currentIndex = index;
+                });
+              },
+              children: [
+                GraphPage(),
+                ThermostatPage(),
+                parametter(),
+              ],
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: is_dark_mode ? Colors.grey : Colors.white,
+        backgroundColor: isDarkMode ? Colors.grey : Colors.white,
         currentIndex: _currentIndex,
         onTap: (index) {
           setState(() {
@@ -83,6 +69,12 @@ class _SliderPageState extends State<SliderPage> {
             // Toggle the visibility of the toggle switch when the specific icon is tapped
             if (index == 1) {
               // Here you can add your logic to toggle visibility
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ModeAuto(),
+                ),
+              );
             }
           });
         },
@@ -102,18 +94,14 @@ class _SliderPageState extends State<SliderPage> {
           ),
           BottomNavigationBarItem(
             icon: Padding(
-              padding:
-                  EdgeInsets.symmetric(vertical: 1), // Adjust vertical padding
+              padding: EdgeInsets.symmetric(vertical: 1),
               child: IconButton(
                 onPressed: () {
                   _pageController.jumpToPage(1);
-                  setState(() {
-                    isToggleVisible = !isToggleVisible; // Toggle the visibility
-                  });
                 },
                 icon: Icon(
                   MdiIcons.thumbsUpDownOutline,
-                  size: 30, // Reduce the icon size
+                  size: 30,
                 ),
               ),
             ),
@@ -121,15 +109,14 @@ class _SliderPageState extends State<SliderPage> {
           ),
           BottomNavigationBarItem(
             icon: Padding(
-              padding:
-                  EdgeInsets.symmetric(vertical: 6), // Adjust vertical padding
+              padding: EdgeInsets.symmetric(vertical: 6),
               child: IconButton(
                 onPressed: () {
                   _pageController.jumpToPage(2);
                 },
                 icon: Icon(
                   Icons.settings_suggest_outlined,
-                  size: 36, // Adjust the icon size
+                  size: 36,
                 ),
               ),
             ),

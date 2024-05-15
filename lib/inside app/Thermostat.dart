@@ -311,7 +311,7 @@ class _ThermostatPageState extends State<ThermostatPage>
               child: ConstrainedBox(
                 constraints: BoxConstraints(),
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20.0),
+                  padding: EdgeInsets.symmetric(horizontal: 0.0),
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context)
                       .size
@@ -412,42 +412,6 @@ class _ThermostatPageState extends State<ThermostatPage>
                             ),
                           ),
                         ],
-                      ),
-                      Visibility(
-                        visible: isToggleVisible,
-                        child: ToggleSwitch(
-                          minWidth: 90.0,
-                          cornerRadius: 20.0,
-                          activeFgColor: Colors.white,
-                          inactiveBgColor: Colors.grey,
-                          inactiveFgColor: Colors.white,
-                          labels: [
-                            'AUTO\nMode', // Add line break here
-                            'MANUAL\nMode' // Add line break here
-                          ],
-                          initialLabelIndex: handButtonPressed ? 0 : 1,
-                          onToggle: (index) {
-                            if (index == 0) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => modeauto(),
-                                ),
-                              ).then((value) {
-                                setState(() {
-                                  handButtonPressed =
-                                      false; // Update to manual mode after returning from auto mode
-                                });
-                              });
-                            } else {
-                              setState(() {
-                                handButtonPressed = true; // Set to manual mode
-                              });
-                            }
-
-                            // Send the updated mode to the database
-                          },
-                        ),
                       ),
                       SizedBox(height: 20.0),
                       GestureDetector(
