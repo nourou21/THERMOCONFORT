@@ -271,14 +271,18 @@ class _ModeAutoState extends State<ModeAuto>
                                                 if (value) {
                                                   isLongDelaySelected =
                                                       false; // Turn off long mode
+
                                                   // Update temperature consigne based on toggle state
                                                   sendTemperatureConsigneToDatabase(
                                                       15);
+                                                  long_mode(false);
                                                 } else {
                                                   // If short mode is turned off, set temperature consigne to default
                                                   sendTemperatureConsigneToDatabase(
                                                       19);
                                                 }
+                                                // Call updateModeText here to update the mode text accordingly
+                                                updateModeText();
                                               });
                                             },
                                           ),
@@ -325,7 +329,6 @@ class _ModeAutoState extends State<ModeAuto>
                                                   // If long mode is turned off, set temperature consigne to default
                                                   sendTemperatureConsigneToDatabase(
                                                       19);
-                                                  long_mode(false);
                                                 }
                                               });
                                             },
@@ -674,11 +677,13 @@ class _ModeAutoState extends State<ModeAuto>
   void updateModeText() {
     setState(() {
       if (isVacationMode) {
-        modeText = 'Vacation Mode';
-      } else if (isLongDelaySelected) {
-        modeText = 'Long Mode';
-      } else if (isShortDelaySelected) {
-        modeText = 'Short Mode';
+        if (isShortDelaySelected) {
+          modeText = 'Vacation Mode\n   Short Mode';
+        } else if (isLongDelaySelected) {
+          modeText = 'Vacation Mode\n   Long Mode';
+        } else {
+          modeText = 'Vacation Mode';
+        }
       } else if (isNightMode) {
         modeText = 'Night Mode';
       } else {
