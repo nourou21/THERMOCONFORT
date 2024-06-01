@@ -15,8 +15,12 @@ import 'package:http/http.dart' as http;
 import 'package:weather_icons/weather_icons.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 
 bool isToggleVisible = false;
+int getCurrentDayOfMonth() {
+  return int.parse(DateFormat('dd').format(DateTime.now()));
+}
 
 class ThermostatPage extends StatefulWidget {
   @override
@@ -36,7 +40,6 @@ class _ThermostatPageState extends State<ThermostatPage>
   int realWeather = parametter.getReadTemp();
   bool handButtonPressed = false;
   bool is_dark_mode = parametter.getDarkMode();
-  
 
   String thermoscctatNamez = parametter.getThermostatName();
 
@@ -53,6 +56,15 @@ class _ThermostatPageState extends State<ThermostatPage>
   Color darkBackgroundColor = Colors.grey.shade900;
   Color darkTextColor = Colors.white;
   Color darkIconColor = Colors.orange;
+
+  void saveTemperatureForCurrentDay(
+      int temperatureAmbainte, int temperatureConsigne) {
+    int currentDay = getCurrentDayOfMonth();
+    databaseReference.child('project/temperatures/$currentDay').set({
+      'temperature_ambainte': temperatureAmbainte,
+      'temperature_consigne': temperatureConsigne,
+    });
+  }
 
   @override
   void initState() {
@@ -88,26 +100,24 @@ class _ThermostatPageState extends State<ThermostatPage>
           readTemp = value.toInt();
         });
 
-        // Check if temperature is -5°C
         if (readTemp == -5) {
-          // Display emergency notification
           showEmergencyNotification();
         }
+
+        // Save temperature for the current day
+        saveTemperatureForCurrentDay(readTemp, temperature);
       } else {
         print('Invalid temperature value from the database');
       }
     });
 
-    // Listen to changes in relay status
     databaseReference.child('project/relay').onValue.listen((event) {
       final dynamic value = event.snapshot.value;
       if (value == 'on') {
-        // If relay is on, show the fire image
         setState(() {
           isrelay = true;
         });
       } else {
-        // If relay is off, hide the fire image
         setState(() {
           isrelay = false;
         });
@@ -129,6 +139,9 @@ class _ThermostatPageState extends State<ThermostatPage>
         setState(() {
           temperature = value.toInt();
         });
+
+        // Save temperature for the current day
+        saveTemperatureForCurrentDay(readTemp, temperature);
       } else {
         print('Invalid temperature value from the database');
       }
