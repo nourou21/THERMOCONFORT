@@ -105,7 +105,7 @@ class GraphPage extends StatelessWidget {
                             xValueMapper: (SalesData sales, _) => sales.year,
                             yValueMapper: (SalesData sales, _) => sales.sales,
                             name:
-                                'set temperature', // Name for the first series
+                                'Set temperature', // Name for the first series
                           ),
                           // Second line series in red
                           LineSeries<SalesData, String>(
@@ -114,7 +114,7 @@ class GraphPage extends StatelessWidget {
                             yValueMapper: (SalesData sales, _) => sales.sales,
                             color: Colors.red, // Set the color to red
                             name:
-                                'ambient temperature', // Name for the second series
+                                'Ambient temperature', // Name for the second series
                           ),
                         ],
                       ),

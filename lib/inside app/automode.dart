@@ -243,98 +243,90 @@ class _ModeAutoState extends State<ModeAuto>
                                     children: [
                                       SizedBox(width: 65),
                                       // Short Delay Toggle Switch
-                                      Column(
-                                        children: [
-                                          Text(
-                                            'Short Mode',
-                                            style: TextStyle(
-                                              fontSize: 12.0,
-                                              color: isShortDelaySelected
-                                                  ? Colors.white
-                                                  : Colors.black,
+                                      if (showDelayButtons) ...[
+                                        Column(
+                                          children: [
+                                            Text(
+                                              'Short Mode',
+                                              style: TextStyle(
+                                                fontSize: 12.0,
+                                                color: isShortDelaySelected
+                                                    ? Colors.white
+                                                    : Colors.black,
+                                              ),
                                             ),
-                                          ),
-                                          FlutterSwitch(
-                                            width: 55.0,
-                                            height: 25.0,
-                                            value: isShortDelaySelected,
-                                            borderRadius: 30.0,
-                                            padding: 2.0,
-                                            showOnOff: false,
-                                            activeToggleColor: Colors
-                                                .blue, // Customize colors as needed
-                                            inactiveToggleColor: Colors
-                                                .grey, // Customize colors as needed
-                                            onToggle: (value) {
-                                              setState(() {
-                                                isShortDelaySelected = value;
-                                                if (value) {
-                                                  isLongDelaySelected =
-                                                      false; // Turn off long mode
-
-                                                  // Update temperature consigne based on toggle state
-                                                  sendTemperatureConsigneToDatabase(
-                                                      15);
-                                                  long_mode(false);
-                                                } else {
-                                                  // If short mode is turned off, set temperature consigne to default
-                                                  sendTemperatureConsigneToDatabase(
-                                                      19);
-                                                }
-                                                // Call updateModeText here to update the mode text accordingly
-                                                updateModeText();
-                                              });
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        width: 30,
-                                      ),
-
+                                            FlutterSwitch(
+                                              width: 55.0,
+                                              height: 25.0,
+                                              value: isShortDelaySelected,
+                                              borderRadius: 30.0,
+                                              padding: 2.0,
+                                              showOnOff: false,
+                                              activeToggleColor: Colors.blue,
+                                              inactiveToggleColor: Colors.grey,
+                                              onToggle: (value) {
+                                                setState(() {
+                                                  isShortDelaySelected = value;
+                                                  if (value) {
+                                                    isLongDelaySelected = false;
+                                                    sendTemperatureConsigneToDatabase(
+                                                        15);
+                                                    long_mode(false);
+                                                  } else {
+                                                    sendTemperatureConsigneToDatabase(
+                                                        19);
+                                                  }
+                                                  updateModeText();
+                                                });
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(
+                                            width:
+                                                30), // Move this line outside of the condition
+                                      ],
                                       // Long Mode Toggle Switch
-                                      Column(
-                                        children: [
-                                          Text(
-                                            'Long Mode',
-                                            style: TextStyle(
-                                              fontSize: 12.0,
-                                              color: isLongDelaySelected
-                                                  ? Colors.white
-                                                  : Colors.black,
+                                      if (showDelayButtons) ...[
+                                        Column(
+                                          children: [
+                                            Text(
+                                              'Long Mode',
+                                              style: TextStyle(
+                                                fontSize: 12.0,
+                                                color: isLongDelaySelected
+                                                    ? Colors.white
+                                                    : Colors.black,
+                                              ),
                                             ),
-                                          ),
-                                          FlutterSwitch(
-                                            width: 55.0,
-                                            height: 25.0,
-                                            value: isLongDelaySelected,
-                                            borderRadius: 30.0,
-                                            padding: 2.0,
-                                            showOnOff: false,
-                                            activeToggleColor: Colors
-                                                .blue, // Customize colors as needed
-                                            inactiveToggleColor: Colors
-                                                .grey, // Customize colors as needed
-                                            onToggle: (value) {
-                                              setState(() {
-                                                isLongDelaySelected = value;
-                                                if (value) {
-                                                  isShortDelaySelected =
-                                                      false; // Turn off short mode
-                                                  // Update temperature consigne based on toggle state
-                                                  sendTemperatureConsigneToDatabase(
-                                                      8);
-                                                  long_mode(true);
-                                                } else {
-                                                  // If long mode is turned off, set temperature consigne to default
-                                                  sendTemperatureConsigneToDatabase(
-                                                      19);
-                                                }
-                                              });
-                                            },
-                                          ),
-                                        ],
-                                      ),
+                                            FlutterSwitch(
+                                              width: 55.0,
+                                              height: 25.0,
+                                              value: isLongDelaySelected,
+                                              borderRadius: 30.0,
+                                              padding: 2.0,
+                                              showOnOff: false,
+                                              activeToggleColor: Colors.blue,
+                                              inactiveToggleColor: Colors.grey,
+                                              onToggle: (value) {
+                                                setState(() {
+                                                  isLongDelaySelected = value;
+                                                  if (value) {
+                                                    isShortDelaySelected =
+                                                        false;
+                                                    sendTemperatureConsigneToDatabase(
+                                                        8);
+                                                    long_mode(true);
+                                                  } else {
+                                                    sendTemperatureConsigneToDatabase(
+                                                        19);
+                                                  }
+                                                });
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      ],
                                     ],
                                   ),
                               ],
@@ -579,12 +571,15 @@ class _ModeAutoState extends State<ModeAuto>
                             width: 160,
                             height: 90,
                             child: ElevatedButton(
-                              child: Text('Night Mode',
-                                  style: TextStyle(fontSize: 18)),
+                              child: Text(
+                                'Night Mode',
+                                style: TextStyle(fontSize: 18),
+                              ),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: !handButtonPressed
+                                backgroundColor: isNightMode
                                     ? Colors.green
-                                    : Colors.grey,
+                                    : Colors
+                                        .grey, // Update color based on isNightMode
                                 padding: EdgeInsets.symmetric(vertical: 10),
                               ),
                               onPressed: () {
@@ -646,8 +641,16 @@ class _ModeAutoState extends State<ModeAuto>
                               daymode = true; // Activate day mode
                               isNightMode = false; // Turn off night mode
                               isVacationMode = false; // Turn off vacation mode
+
+                              // Update button colors
+                              handButtonPressed =
+                                  false; // Turn off vacation mode button
+                              isNightMode = false; // Turn off night mode button
                             });
-                            sendDayModeToDatabase(daymode); // Update database
+                            // Update database
+                            sendDayModeToDatabase(daymode);
+                            sendVacationModeToDatabase(
+                                false); // Turn off vacation mode in the database
                             sendTemperatureConsigneToDatabase(
                                 19); // Set temperature consigne to 19
                           },
