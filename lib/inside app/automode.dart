@@ -272,6 +272,8 @@ class _ModeAutoState extends State<ModeAuto>
                                                     sendTemperatureConsigneToDatabase(
                                                         15);
                                                     long_mode(false);
+                                                    showDelayButtons =
+                                                        true; // Set showDelayButtons to true
                                                   } else {
                                                     sendTemperatureConsigneToDatabase(
                                                         19);
