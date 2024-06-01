@@ -36,6 +36,7 @@ class _ThermostatPageState extends State<ThermostatPage>
   int realWeather = parametter.getReadTemp();
   bool handButtonPressed = false;
   bool is_dark_mode = parametter.getDarkMode();
+  
 
   String thermoscctatNamez = parametter.getThermostatName();
 
@@ -305,191 +306,183 @@ class _ThermostatPageState extends State<ThermostatPage>
     return WillPopScope(
       onWillPop: () async => false,
       child: Scaffold(
-        body: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
-            return SingleChildScrollView(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(),
-                child: Container(
-                  alignment: Alignment.center,
-                  color: backgroundColor,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      SizedBox(
-                        height: 50,
+          body: SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(),
+          child: Container(
+            alignment: Alignment.center,
+            color: backgroundColor,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                SizedBox(
+                  height: 80,
+                ),
+                Row(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () async {
+                        try {
+                          await FirebaseAuth.instance.signOut();
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => LOGINN()),
+                          );
+                        } catch (e) {
+                          print('Sign out error: $e');
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red, // Make the button red
                       ),
-                      Row(
+                      child: const Text(
+                        'Sign Out',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 180,
+                    ),
+                    Visibility(
+                      visible: isweatherVisible,
+                      child: Column(
                         children: [
-                          ElevatedButton(
-                            onPressed: () async {
-                              try {
-                                await FirebaseAuth.instance.signOut();
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => LOGINN()),
-                                );
-                              } catch (e) {
-                                print('Sign out error: $e');
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  Colors.red, // Make the button red
-                            ),
-                            child: const Text(
-                              'Sign Out',
-                              style: TextStyle(color: Colors.white),
-                            ),
+                          Icon(
+                            // Choose weather icon based on temperature
+                            realWeather >= 25
+                                ? WeatherIcons.day_sunny
+                                : realWeather >= 15
+                                    ? WeatherIcons.day_cloudy
+                                    : WeatherIcons.cloud,
+                            size: 50,
+                            color: iconColor, // Use chosen icon color
                           ),
                           SizedBox(
-                            width: 180,
-                          ),
-                          Visibility(
-                            visible: isweatherVisible,
-                            child: Column(
-                              children: [
-                                Icon(
-                                  // Choose weather icon based on temperature
-                                  realWeather >= 25
-                                      ? WeatherIcons.day_sunny
-                                      : realWeather >= 15
-                                          ? WeatherIcons.day_cloudy
-                                          : WeatherIcons.cloud,
-                                  size: 50,
-                                  color: iconColor, // Use chosen icon color
-                                ),
-                                SizedBox(
-                                  height: 5,
-                                ),
-                                Text(
-                                  'Its : $realWeather°C',
-                                  style: GoogleFonts.lato(
-                                    fontSize: 20.0,
-                                    fontWeight: FontWeight.bold,
-                                    color: textColor, // Use chosen text color
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          SizedBox(
-                            width: isweatherpressed ? 265 : 0,
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 10),
-                      SizedBox(height: 10),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          DefaultTextStyle(
-                            style: TextStyle(
-                              color: _animation.value,
-                            ),
-                            child: SizedBox(
-                              height: 80.0,
-                              child: TyperAnimatedTextKit(
-                                text: [thermoscctatNamez],
-                                textStyle: GoogleFonts.lato(
-                                  // Using Lato font as an example
-                                  textStyle: TextStyle(
-                                    color:
-                                        const Color.fromARGB(255, 145, 87, 1),
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 40,
-                                  ),
-                                ),
-                                textAlign: TextAlign.start,
-                                isRepeatingAnimation: false,
-                                speed: Duration(milliseconds: 200),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 20.0),
-                      GestureDetector(
-                        onTap: incrementTemperature,
-                        child: Image.asset(
-                          'assets/UP.png',
-                          width: 100.0,
-                          height: 100.0,
-                        ),
-                      ),
-                      SizedBox(height: 20.0),
-                      Text(
-                        '$temperature°C',
-                        style: TextStyle(
-                          fontSize: 50.0,
-                          color: Color(0xFFB97A57),
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: 20.0),
-                      GestureDetector(
-                        onTap: decrementTemperature,
-                        child: Image.asset(
-                          'assets/DOWN.png',
-                          width: 100.0,
-                          height: 100.0,
-                        ),
-                      ),
-                      SizedBox(height: 20.0),
-                      Column(
-                        children: [],
-                      ),
-                      Row(
-                        children: [
-                          SizedBox(
-                            width: 90,
+                            height: 5,
                           ),
                           Text(
-                            '$readTemp°C',
-                            style: TextStyle(
-                              fontSize: 35.0,
-                              color: _getColorForTemperature(readTemp),
+                            'Its : $realWeather°C',
+                            style: GoogleFonts.lato(
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.bold,
+                              color: textColor, // Use chosen text color
                             ),
-                            textAlign: TextAlign.center,
-                          ),
-                          SizedBox(
-                            width: 60,
-                          ),
-                          Stack(
-                            children: [
-                              Image.asset(
-                                'assets/phone_dark.png',
-                                width: 100,
-                                height: 100,
-                              ),
-                              Positioned(
-                                top: 20, // Adjust the position as needed
-                                left: 30, // Adjust the position as needed
-                                child: isrelay
-                                    ? Image.asset(
-                                        'assets/fire.png', // First image
-                                        width: 40,
-                                        height: 40,
-                                      )
-                                    : SizedBox(),
-                              ),
-                            ],
                           ),
                         ],
                       ),
-                    ],
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    SizedBox(
+                      width: isweatherpressed ? 265 : 0,
+                    ),
+                  ],
+                ),
+                SizedBox(height: 10),
+                SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    DefaultTextStyle(
+                      style: TextStyle(
+                        color: _animation.value,
+                      ),
+                      child: SizedBox(
+                        height: 80.0,
+                        child: TyperAnimatedTextKit(
+                          text: [thermoscctatNamez],
+                          textStyle: GoogleFonts.lato(
+                            // Using Lato font as an example
+                            textStyle: TextStyle(
+                              color: const Color.fromARGB(255, 145, 87, 1),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 40,
+                            ),
+                          ),
+                          textAlign: TextAlign.start,
+                          isRepeatingAnimation: false,
+                          speed: Duration(milliseconds: 200),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20.0),
+                GestureDetector(
+                  onTap: incrementTemperature,
+                  child: Image.asset(
+                    'assets/UP.png',
+                    width: 100.0,
+                    height: 100.0,
                   ),
                 ),
-              ),
-            );
-          },
+                SizedBox(height: 20.0),
+                Text(
+                  '$temperature°C',
+                  style: TextStyle(
+                    fontSize: 50.0,
+                    color: Color(0xFFB97A57),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 20.0),
+                GestureDetector(
+                  onTap: decrementTemperature,
+                  child: Image.asset(
+                    'assets/DOWN.png',
+                    width: 100.0,
+                    height: 100.0,
+                  ),
+                ),
+                SizedBox(height: 20.0),
+                Column(
+                  children: [],
+                ),
+                Row(
+                  children: [
+                    SizedBox(
+                      width: 90,
+                    ),
+                    Text(
+                      '$readTemp°C',
+                      style: TextStyle(
+                        fontSize: 35.0,
+                        color: _getColorForTemperature(readTemp),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(
+                      width: 60,
+                    ),
+                    Stack(
+                      children: [
+                        Image.asset(
+                          'assets/phone_dark.png',
+                          width: 100,
+                          height: 100,
+                        ),
+                        Positioned(
+                          top: 20, // Adjust the position as needed
+                          left: 30, // Adjust the position as needed
+                          child: isrelay
+                              ? Image.asset(
+                                  'assets/fire.png', // First image
+                                  width: 40,
+                                  height: 40,
+                                )
+                              : SizedBox(),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
-      ),
+      )),
     );
   }
 

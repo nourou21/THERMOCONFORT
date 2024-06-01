@@ -5,6 +5,7 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_2/inside%20app/Thermostat.dart';
 import 'package:flutter_application_2/inside%20app/paramettre.dart';
+import 'package:flutter_switch/flutter_switch.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -26,7 +27,7 @@ class _ModeAutoState extends State<ModeAuto>
   late AnimationController _controller;
   late Animation<Color?> _animation;
   bool isRelay = true;
-
+  bool showDelayButtons = false;
   int readTemp = 0;
   int temperature = 0;
   bool isDarkMode = parametter.getDarkMode();
@@ -36,10 +37,12 @@ class _ModeAutoState extends State<ModeAuto>
 
   bool handButtonPressed = false;
   bool daymode = true;
-  bool isNightMode = false; // Add this variable for night mode
+  bool isNightMode = false;
   bool isVacationMode = false; // Initialize vacation mode variable
-
+  bool isShortDelaySelected = false;
+  bool isLongDelaySelected = false;
   String thermoscctatNamez = "";
+  String modeText = '';
 
   Color backgroundColor = Colors.white;
 
@@ -79,6 +82,7 @@ class _ModeAutoState extends State<ModeAuto>
     isNightMode = false; // Initialize night mode to false
     isVacationMode = false; // Initialize vacation mode to false
     sendAutomode(true);
+    updateModeText(); // Call updateModeText here
   }
 
   @override
@@ -125,6 +129,38 @@ class _ModeAutoState extends State<ModeAuto>
     });
   }
 
+  void sendTemperatureConsigneToDatabase(int temperature) {
+    // Send the temperature consigne value to the database
+    databaseReference.child('project/temperature consigne').set(temperature);
+  }
+
+  void sendDayModeToDatabase(bool isDayMode) {
+    // Send the day mode value to the database
+    databaseReference.child('project/_mode').set(isDayMode ? 'on' : 'off');
+  }
+
+  void sendNightModeToDatabase(bool isNightMode) {
+    // Send the night mode value to the database
+    databaseReference.child('project/_mode').set(isNightMode ? 'on' : 'off');
+  }
+
+  void sendVacationModeToDatabase(bool isVacationMode) {
+    // Send the vacation mode value to the database
+    databaseReference
+        .child('project/vacation_mode')
+        .set(isVacationMode ? 'on' : 'off');
+    showDelayButtons = isVacationMode;
+    updateModeText();
+  }
+
+  void long_mode(bool isLongDelaySelected) {
+    databaseReference
+        .child('project/long_mode')
+        .set(isLongDelaySelected ? 'on' : 'off');
+    showDelayButtons = isLongDelaySelected;
+    updateModeText();
+  }
+
   void listenToTemperatureConsigne() {
     // Your existing code to listen to temperature consigne
   }
@@ -156,18 +192,12 @@ class _ModeAutoState extends State<ModeAuto>
     });
   }
 
-  void sendVacationModeToDatabase(bool isVacationMode) {
-    // Send the vacation mode value to the database
-    databaseReference
-        .child('project/vacation_mode')
-        .set(isVacationMode ? 'on' : 'off');
-  }
-
   void sendAutomode(bool isAutoMode) {
     databaseReference.child('project/_mode').once().then((DatabaseEvent event) {
       final value = event.snapshot.value;
       setState(() {
         daymode = value == 'on'; // Update vacation mode state
+        updateModeText();
       });
     });
   }
@@ -202,6 +232,111 @@ class _ModeAutoState extends State<ModeAuto>
                               Navigator.pop(context);
                             },
                           ),
+                          Center(
+                            child: Column(
+                              children: [
+                                SizedBox(
+                                  height: 30,
+                                ),
+                                if (showDelayButtons)
+                                  Row(
+                                    children: [
+                                      SizedBox(width: 65),
+                                      // Short Delay Toggle Switch
+                                      Column(
+                                        children: [
+                                          Text(
+                                            'Short Mode',
+                                            style: TextStyle(
+                                              fontSize: 12.0,
+                                              color: isShortDelaySelected
+                                                  ? Colors.white
+                                                  : Colors.black,
+                                            ),
+                                          ),
+                                          FlutterSwitch(
+                                            width: 55.0,
+                                            height: 25.0,
+                                            value: isShortDelaySelected,
+                                            borderRadius: 30.0,
+                                            padding: 2.0,
+                                            showOnOff: false,
+                                            activeToggleColor: Colors
+                                                .blue, // Customize colors as needed
+                                            inactiveToggleColor: Colors
+                                                .grey, // Customize colors as needed
+                                            onToggle: (value) {
+                                              setState(() {
+                                                isShortDelaySelected = value;
+                                                if (value) {
+                                                  isLongDelaySelected =
+                                                      false; // Turn off long mode
+                                                  // Update temperature consigne based on toggle state
+                                                  sendTemperatureConsigneToDatabase(
+                                                      15);
+                                                } else {
+                                                  // If short mode is turned off, set temperature consigne to default
+                                                  sendTemperatureConsigneToDatabase(
+                                                      19);
+                                                }
+                                              });
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(
+                                        width: 30,
+                                      ),
+
+                                      // Long Mode Toggle Switch
+                                      Column(
+                                        children: [
+                                          Text(
+                                            'Long Mode',
+                                            style: TextStyle(
+                                              fontSize: 12.0,
+                                              color: isLongDelaySelected
+                                                  ? Colors.white
+                                                  : Colors.black,
+                                            ),
+                                          ),
+                                          FlutterSwitch(
+                                            width: 55.0,
+                                            height: 25.0,
+                                            value: isLongDelaySelected,
+                                            borderRadius: 30.0,
+                                            padding: 2.0,
+                                            showOnOff: false,
+                                            activeToggleColor: Colors
+                                                .blue, // Customize colors as needed
+                                            inactiveToggleColor: Colors
+                                                .grey, // Customize colors as needed
+                                            onToggle: (value) {
+                                              setState(() {
+                                                isLongDelaySelected = value;
+                                                if (value) {
+                                                  isShortDelaySelected =
+                                                      false; // Turn off short mode
+                                                  // Update temperature consigne based on toggle state
+                                                  sendTemperatureConsigneToDatabase(
+                                                      8);
+                                                  long_mode(true);
+                                                } else {
+                                                  // If long mode is turned off, set temperature consigne to default
+                                                  sendTemperatureConsigneToDatabase(
+                                                      19);
+                                                  long_mode(false);
+                                                }
+                                              });
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                              ],
+                            ),
+                          ),
                           Row(
                             children: [
                               SizedBox(
@@ -209,9 +344,6 @@ class _ModeAutoState extends State<ModeAuto>
                               ),
                               Column(
                                 children: [
-                                  SizedBox(
-                                    height: 80,
-                                  ),
                                   Visibility(
                                     visible: isWeatherVisible,
                                     child: Column(
@@ -244,6 +376,18 @@ class _ModeAutoState extends State<ModeAuto>
                             ],
                           ),
                         ],
+                      ),
+                      AnimatedSwitcher(
+                        duration: Duration(milliseconds: 500),
+                        child: Text(
+                          modeText,
+                          key: ValueKey<String>(modeText),
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: textColor,
+                          ),
+                        ),
                       ),
                       Visibility(
                         visible: isWeatherVisible, // Show weather if visible
@@ -305,32 +449,6 @@ class _ModeAutoState extends State<ModeAuto>
                           ),
                         ],
                       ),
-                      Visibility(
-                        visible: isToggleVisible,
-                        child: ToggleSwitch(
-                          minWidth: 90.0,
-                          cornerRadius: 20.0,
-                          activeFgColor: Colors.white,
-                          inactiveBgColor: Colors.grey,
-                          inactiveFgColor: Colors.white,
-                          labels: ['AUTO\nMode', 'MANUAL\nMode'],
-                          initialLabelIndex: handButtonPressed ? 0 : 1,
-                          onToggle: (index) {
-                            setState(() {
-                              handButtonPressed = index == 0;
-                              if (handButtonPressed) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => ThermostatPage()),
-                                );
-                              }
-                            });
-
-                            sendVacationModeToDatabase(handButtonPressed);
-                          },
-                        ),
-                      ),
                       if (isNightMode && !isVacationMode)
                         Column(
                           children: [
@@ -367,7 +485,7 @@ class _ModeAutoState extends State<ModeAuto>
                                 ),
                                 Row(
                                   children: [
-                                    SizedBox(width: 210),
+                                    SizedBox(width: 205),
                                     Text(
                                       '$readTemp°C',
                                       style: TextStyle(
@@ -400,7 +518,7 @@ class _ModeAutoState extends State<ModeAuto>
                                 ),
                                 Row(
                                   children: [
-                                    SizedBox(width: 210),
+                                    SizedBox(width: 136),
                                     Text(
                                       '$readTemp°C',
                                       style: TextStyle(
@@ -474,6 +592,7 @@ class _ModeAutoState extends State<ModeAuto>
                                   daymode = false; // Deactivate AUTO mode
                                 });
                                 sendVacationModeToDatabase(handButtonPressed);
+                                sendTemperatureConsigneToDatabase(16);
                               },
                             ),
                           ),
@@ -510,8 +629,10 @@ class _ModeAutoState extends State<ModeAuto>
                         width: 160,
                         height: 90,
                         child: ElevatedButton(
-                          child:
-                              Text('Day Mode', style: TextStyle(fontSize: 18)),
+                          child: Text(
+                            'Day Mode',
+                            style: TextStyle(fontSize: 18),
+                          ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor:
                                 daymode ? Colors.green : Colors.grey,
@@ -519,11 +640,13 @@ class _ModeAutoState extends State<ModeAuto>
                           ),
                           onPressed: () {
                             setState(() {
-                              daymode = !daymode; // Toggle the daymode variable
+                              daymode = true; // Activate day mode
                               isNightMode = false; // Turn off night mode
                               isVacationMode = false; // Turn off vacation mode
                             });
-                            sendAutomode(daymode); // Update database
+                            sendDayModeToDatabase(daymode); // Update database
+                            sendTemperatureConsigneToDatabase(
+                                19); // Set temperature consigne to 19
                           },
                         ),
                       ),
@@ -546,5 +669,21 @@ class _ModeAutoState extends State<ModeAuto>
     } else {
       return Color.fromRGBO(184, 122, 90, 1.0);
     }
+  }
+
+  void updateModeText() {
+    setState(() {
+      if (isVacationMode) {
+        modeText = 'Vacation Mode';
+      } else if (isLongDelaySelected) {
+        modeText = 'Long Mode';
+      } else if (isShortDelaySelected) {
+        modeText = 'Short Mode';
+      } else if (isNightMode) {
+        modeText = 'Night Mode';
+      } else {
+        modeText = ''; // Default text when no mode is selected
+      }
+    });
   }
 }

@@ -94,12 +94,18 @@ class GraphPage extends StatelessWidget {
                                     .black, // Adjust color based on dark mode
                           ),
                         ),
+                        legend: Legend(
+                            isVisible: true, // Show the legend
+                            position: LegendPosition
+                                .bottom), // Position the legend at the bottom
                         series: [
                           // First line series
                           LineSeries<SalesData, String>(
                             dataSource: chartData1,
                             xValueMapper: (SalesData sales, _) => sales.year,
                             yValueMapper: (SalesData sales, _) => sales.sales,
+                            name:
+                                'set temperature', // Name for the first series
                           ),
                           // Second line series in red
                           LineSeries<SalesData, String>(
@@ -107,6 +113,8 @@ class GraphPage extends StatelessWidget {
                             xValueMapper: (SalesData sales, _) => sales.year,
                             yValueMapper: (SalesData sales, _) => sales.sales,
                             color: Colors.red, // Set the color to red
+                            name:
+                                'ambient temperature', // Name for the second series
                           ),
                         ],
                       ),
