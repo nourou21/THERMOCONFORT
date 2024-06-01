@@ -311,17 +311,14 @@ class _ThermostatPageState extends State<ThermostatPage>
               child: ConstrainedBox(
                 constraints: BoxConstraints(),
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 0.0),
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context)
-                      .size
-                      .height, // Set height to screen height
-
                   alignment: Alignment.center,
                   color: backgroundColor,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
+                      SizedBox(
+                        height: 50,
+                      ),
                       Row(
                         children: [
                           ElevatedButton(
@@ -346,12 +343,8 @@ class _ThermostatPageState extends State<ThermostatPage>
                               style: TextStyle(color: Colors.white),
                             ),
                           ),
-                        ],
-                      ),
-                      Row(
-                        children: [
                           SizedBox(
-                            width: isweatherpressed ? 265 : 0,
+                            width: 180,
                           ),
                           Visibility(
                             visible: isweatherVisible,
@@ -380,6 +373,13 @@ class _ThermostatPageState extends State<ThermostatPage>
                                 ),
                               ],
                             ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          SizedBox(
+                            width: isweatherpressed ? 265 : 0,
                           ),
                         ],
                       ),

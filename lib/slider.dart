@@ -15,6 +15,7 @@ class SliderPage extends StatefulWidget {
 
 class _SliderPageState extends State<SliderPage> {
   int _currentIndex = 0;
+  int _thermostatTapCount = 0; // Track the number of taps on Thermostat icon
   late PageController _pageController;
 
   @override
@@ -39,15 +40,15 @@ class _SliderPageState extends State<SliderPage> {
           Expanded(
             child: PageView(
               controller: _pageController,
-              physics: AlwaysScrollableScrollPhysics(), // Allow scrolling
+              physics: NeverScrollableScrollPhysics(), // Block scrolling
               onPageChanged: (index) {
                 setState(() {
                   _currentIndex = index;
                 });
               },
               children: [
-                GraphPage(),
                 ThermostatPage(),
+                GraphPage(),
                 parametter(),
               ],
             ),
@@ -65,24 +66,13 @@ class _SliderPageState extends State<SliderPage> {
               duration: Duration(milliseconds: 100),
               curve: Curves.ease,
             );
-
-            // Toggle the visibility of the toggle switch when the specific icon is tapped
-            if (index == 1) {
-              // Here you can add your logic to toggle visibility
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ModeAuto(),
-                ),
-              );
-            }
           });
         },
         items: [
           BottomNavigationBarItem(
             icon: IconButton(
               onPressed: () {
-                _pageController.jumpToPage(0);
+                _pageController.jumpToPage(1);
               },
               icon: Image.asset(
                 'assets/graphdark.png',
@@ -97,7 +87,18 @@ class _SliderPageState extends State<SliderPage> {
               padding: EdgeInsets.symmetric(vertical: 1),
               child: IconButton(
                 onPressed: () {
-                  _pageController.jumpToPage(1);
+                  _thermostatTapCount++; // Increment tap count
+                  if (_thermostatTapCount == 2) {
+                    _thermostatTapCount = 0; // Reset tap count
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ModeAuto(),
+                      ),
+                    );
+                  } else {
+                    _pageController.jumpToPage(0);
+                  }
                 },
                 icon: Icon(
                   MdiIcons.thumbsUpDownOutline,

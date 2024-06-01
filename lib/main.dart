@@ -23,16 +23,15 @@ Future<void> _initFirebase() async {
   );
 }
 
-
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-         title: 'Flutter Demo',
+      title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
-         theme: ThemeData.light(), // Commencez par le thème clair
+      theme: ThemeData.light(), // Commencez par le thème clair
       home: FutureBuilder<Widget>(
         future: _getInitialScreen(),
         builder: (context, snapshot) {
@@ -46,7 +45,8 @@ class MyApp extends StatelessWidget {
       ),
     );
   }
-   Future<Widget> _getInitialScreen() async {
+
+  Future<Widget> _getInitialScreen() async {
     // Check for saved login credentials
     final prefs = await SharedPreferences.getInstance();
     final email = prefs.getString('email');
@@ -77,4 +77,3 @@ class MyApp extends StatelessWidget {
     return const LOGINN();
   }
 }
-

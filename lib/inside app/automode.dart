@@ -5,6 +5,7 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_2/inside%20app/Thermostat.dart';
 import 'package:flutter_application_2/inside%20app/paramettre.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:toggle_switch/toggle_switch.dart';
@@ -34,6 +35,7 @@ class _ModeAutoState extends State<ModeAuto>
   int realWeather = parametter.getReadTemp();
 
   bool handButtonPressed = false;
+  bool daymode = true;
   bool isNightMode = false; // Add this variable for night mode
   bool isVacationMode = false; // Initialize vacation mode variable
 
@@ -71,6 +73,12 @@ class _ModeAutoState extends State<ModeAuto>
     listenToTemperatureConsigne();
     fetchWeatherData(); // Fetch weather data on init
     fetchInitialModeFromDatabase(); // Fetch initial mode settings
+
+    // Set daymode to true initially and update database
+    daymode = true;
+    isNightMode = false; // Initialize night mode to false
+    isVacationMode = false; // Initialize vacation mode to false
+    sendAutomode(true);
   }
 
   @override
@@ -82,7 +90,7 @@ class _ModeAutoState extends State<ModeAuto>
 
   void listenToTemperatureChanges() {
     databaseReference
-        .child('project/temperature ambainte')
+        .child('project/temperature consigne')
         .onValue
         .listen((event) {
       final dynamic value = event.snapshot.value;
@@ -153,6 +161,15 @@ class _ModeAutoState extends State<ModeAuto>
     databaseReference
         .child('project/vacation_mode')
         .set(isVacationMode ? 'on' : 'off');
+  }
+
+  void sendAutomode(bool isAutoMode) {
+    databaseReference.child('project/_mode').once().then((DatabaseEvent event) {
+      final value = event.snapshot.value;
+      setState(() {
+        daymode = value == 'on'; // Update vacation mode state
+      });
+    });
   }
 
   @override
@@ -284,18 +301,10 @@ class _ModeAutoState extends State<ModeAuto>
                       Row(
                         children: [
                           SizedBox(
-                            width: 240,
+                            width: 300,
                           ),
-                          if (isNightMode &&
-                              !isVacationMode) // Conditionally render zzz icon if it's night mode and not in vacation mode
-                            Image.asset(
-                              'assets/zzz.png',
-                              width: 90,
-                              height: 90,
-                            ),
                         ],
                       ),
-                      SizedBox(height: 1.0),
                       Visibility(
                         visible: isToggleVisible,
                         child: ToggleSwitch(
@@ -322,58 +331,90 @@ class _ModeAutoState extends State<ModeAuto>
                           },
                         ),
                       ),
-                      SizedBox(height: 30.0),
-                      Stack(
-                        children: [
-                          if (isNightMode) // Conditionally render moon icon if night mode is true
+                      if (isNightMode && !isVacationMode)
+                        Column(
+                          children: [
+                            SizedBox(
+                              height: 40,
+                            ),
                             Row(
                               children: [
                                 SizedBox(
-                                  width: 90,
-                                ),
-                                Image.asset(
-                                  'assets/moon.png',
-                                  width: 120,
-                                  height: 120,
+                                  width: 280,
                                 ),
                               ],
                             ),
-                          SizedBox(
-                            height: 90,
-                          ),
-                          Row(
-                            children: [
-                              SizedBox(
-                                width: 155,
-                              ),
-                              Text(
-                                '$readTemp°C',
-                                style: TextStyle(
-                                  fontSize: 50.0,
-                                  color: _getColorForTemperature(readTemp),
+                          ],
+                        ),
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          if ((!daymode || !isVacationMode) && isNightMode) ...[
+                            Row(
+                              children: [
+                                SizedBox(width: 320),
+                                Image.asset(
+                                  'assets/zzz.png',
+                                  width: 45,
+                                  height: 60,
                                 ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
-                          Positioned(
-                            top: 0,
-                            right: 90,
-                            left: 0,
-                            bottom:
-                                0, // Add bottom value to ensure full visibility
-                            child: Column(
+                              ],
+                            ),
+                            Column(
                               children: [
                                 SizedBox(
-                                  height: 5,
+                                  height: 70,
+                                ),
+                                Row(
+                                  children: [
+                                    SizedBox(width: 210),
+                                    Text(
+                                      '$readTemp°C',
+                                      style: TextStyle(
+                                        fontSize: 50.0,
+                                        color: Colors.grey.shade700,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-                          ),
+                            Column(
+                              children: [
+                                SizedBox(height: 80),
+                                FaIcon(
+                                  FontAwesomeIcons.solidMoon,
+                                  size: 180.0,
+                                  color: isDarkMode
+                                      ? Colors.grey
+                                      : Colors.grey.shade700,
+                                ),
+                              ],
+                            ),
+                          ] else ...[
+                            Column(
+                              children: [
+                                SizedBox(
+                                  height: 70,
+                                ),
+                                Row(
+                                  children: [
+                                    SizedBox(width: 210),
+                                    Text(
+                                      '$readTemp°C',
+                                      style: TextStyle(
+                                        fontSize: 50.0,
+                                        color: Colors.grey.shade700,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
                         ],
-                      ),
-                      SizedBox(
-                        height: 30,
                       ),
                       Row(
                         children: [
@@ -393,7 +434,7 @@ class _ModeAutoState extends State<ModeAuto>
                                 ],
                               ),
                               Positioned(
-                                top: 20,
+                                top: 50,
                                 left: 30,
                                 child: isRelay
                                     ? Image.asset(
@@ -408,66 +449,83 @@ class _ModeAutoState extends State<ModeAuto>
                         ],
                       ),
                       SizedBox(
-                        height: 90,
+                        height: 35,
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           SizedBox(
-                            width: 160, // Adjust the width as needed
-                            height: 90, // Adjust the height as needed
+                            width: 160,
+                            height: 90,
                             child: ElevatedButton(
                               child: Text('Night Mode',
-                                  style: TextStyle(
-                                      fontSize:
-                                          18)), // Adjust font size as needed
+                                  style: TextStyle(fontSize: 18)),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: !handButtonPressed
                                     ? Colors.green
                                     : Colors.grey,
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 10), // Adjust vertical padding
+                                padding: EdgeInsets.symmetric(vertical: 10),
                               ),
                               onPressed: () {
                                 setState(() {
-                                  handButtonPressed =
-                                      false; // Turn off vacation mode
-                                  isNightMode = true; // Activate night mode
-                                  isVacationMode =
-                                      false; // Deactivate vacation mode
+                                  handButtonPressed = false;
+                                  isNightMode = true;
+                                  isVacationMode = false;
+                                  daymode = false; // Deactivate AUTO mode
                                 });
                                 sendVacationModeToDatabase(handButtonPressed);
                               },
                             ),
                           ),
-                          SizedBox(width: 20), // Add spacing between buttons
+                          SizedBox(width: 20),
                           SizedBox(
-                            width: 160, // Adjust the width as needed
-                            height: 90, // Adjust the height as needed
+                            width: 160,
+                            height: 90,
                             child: ElevatedButton(
                               child: Text('Vacation Mode',
-                                  style: TextStyle(
-                                      fontSize:
-                                          18)), // Adjust font size as needed
+                                  style: TextStyle(fontSize: 18)),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: handButtonPressed
                                     ? Colors.green
                                     : Colors.grey,
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 10), // Adjust vertical padding
+                                padding: EdgeInsets.symmetric(vertical: 10),
                               ),
                               onPressed: () {
                                 setState(() {
                                   handButtonPressed = !handButtonPressed;
-                                  isNightMode = false; // Deactivate night mode
-                                  isVacationMode =
-                                      handButtonPressed; // Set vacation mode accordingly
+                                  isNightMode = false;
+                                  isVacationMode = handButtonPressed;
+                                  daymode = false; // Deactivate AUTO mode
                                 });
                                 sendVacationModeToDatabase(handButtonPressed);
                               },
                             ),
                           ),
                         ],
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      SizedBox(
+                        width: 160,
+                        height: 90,
+                        child: ElevatedButton(
+                          child:
+                              Text('Day Mode', style: TextStyle(fontSize: 18)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                daymode ? Colors.green : Colors.grey,
+                            padding: EdgeInsets.symmetric(vertical: 10),
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              daymode = !daymode; // Toggle the daymode variable
+                              isNightMode = false; // Turn off night mode
+                              isVacationMode = false; // Turn off vacation mode
+                            });
+                            sendAutomode(daymode); // Update database
+                          },
+                        ),
                       ),
                     ],
                   ),

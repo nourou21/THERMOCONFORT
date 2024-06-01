@@ -11,13 +11,23 @@ class GraphPage extends StatelessWidget {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
     bool is_dark_mode = parametter.getDarkMode();
 
-    // Sample data for the chart
-    List<SalesData> chartData = [
+    // Sample data for the first series
+    List<SalesData> chartData1 = [
       SalesData('Jan', 37),
       SalesData('Feb', 28),
       SalesData('Mar', 34),
       SalesData('Apr', 32),
       SalesData('May', 40),
+      SalesData('Jun', 45),
+    ];
+
+    // Sample data for the second series
+    List<SalesData> chartData2 = [
+      SalesData('Jan', 20),
+      SalesData('Feb', 30),
+      SalesData('Mar', 25),
+      SalesData('Apr', 40),
+      SalesData('May', 35),
       SalesData('Jun', 45),
     ];
 
@@ -66,7 +76,7 @@ class GraphPage extends StatelessWidget {
                         ],
                       ),
                       SizedBox(height: 20),
-                      // Add the chart widget here
+                      // Combined chart with multiple series
                       SfCartesianChart(
                         primaryXAxis: CategoryAxis(
                           labelStyle: TextStyle(
@@ -85,11 +95,18 @@ class GraphPage extends StatelessWidget {
                           ),
                         ),
                         series: [
-                          // Renders line chart
+                          // First line series
                           LineSeries<SalesData, String>(
-                            dataSource: chartData,
+                            dataSource: chartData1,
                             xValueMapper: (SalesData sales, _) => sales.year,
                             yValueMapper: (SalesData sales, _) => sales.sales,
+                          ),
+                          // Second line series in red
+                          LineSeries<SalesData, String>(
+                            dataSource: chartData2,
+                            xValueMapper: (SalesData sales, _) => sales.year,
+                            yValueMapper: (SalesData sales, _) => sales.sales,
+                            color: Colors.red, // Set the color to red
                           ),
                         ],
                       ),
