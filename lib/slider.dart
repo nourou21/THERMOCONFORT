@@ -57,17 +57,6 @@ class _SliderPageState extends State<SliderPage> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: isDarkMode ? Colors.grey : Colors.white,
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-            _pageController.animateToPage(
-              index,
-              duration: Duration(milliseconds: 100),
-              curve: Curves.ease,
-            );
-          });
-        },
         items: [
           BottomNavigationBarItem(
             icon: IconButton(
