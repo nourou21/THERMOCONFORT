@@ -52,7 +52,7 @@ class MyApp extends StatelessWidget {
     final email = prefs.getString('email');
     final password = prefs.getString('password');
 
-    // Check if the user is already authenticated
+    // Check if the user is already authenticat`ed
     final currentUser = FirebaseAuth.instance.currentUser;
 
     // If the user is already authenticated, return the home screen
