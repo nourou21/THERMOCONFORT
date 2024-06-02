@@ -243,7 +243,9 @@ class _ModeAutoState extends State<ModeAuto>
                                     children: [
                                       SizedBox(width: 65),
                                       // Short Delay Toggle Switch
-                                      if (showDelayButtons) ...[
+                                      if (showDelayButtons &&
+                                          !isNightMode &&
+                                          !daymode) ...[
                                         Column(
                                           children: [
                                             Text(
@@ -271,6 +273,9 @@ class _ModeAutoState extends State<ModeAuto>
                                                     isLongDelaySelected = false;
                                                     sendTemperatureConsigneToDatabase(
                                                         15);
+                                                    showDelayButtons =
+                                                        true; // Set showDelayButtons to true
+
                                                     long_mode(false);
                                                     showDelayButtons =
                                                         true; // Set showDelayButtons to true
@@ -289,7 +294,9 @@ class _ModeAutoState extends State<ModeAuto>
                                                 30), // Move this line outside of the condition
                                       ],
                                       // Long Mode Toggle Switch
-                                      if (showDelayButtons) ...[
+                                      if (showDelayButtons &&
+                                          !isNightMode &&
+                                          !daymode) ...[
                                         Column(
                                           children: [
                                             Text(
@@ -569,55 +576,74 @@ class _ModeAutoState extends State<ModeAuto>
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          SizedBox(
-                            width: 160,
-                            height: 90,
-                            child: ElevatedButton(
-                              child: Text(
-                                'Night Mode',
-                                style: TextStyle(fontSize: 18),
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              setState(() {
+                                isNightMode = !isNightMode;
+                                isVacationMode = false;
+                                daymode = false;
+                                sendNightModeToDatabase(isNightMode);
+                                updateModeText();
+                              });
+                            },
+                            icon: Icon(
+                              FontAwesomeIcons.moon,
+                              color: Colors.white,
+                            ),
+                            label: Text(
+                              'Night Mode',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
                               ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: isNightMode
-                                    ? Colors.green
-                                    : Colors
-                                        .grey, // Update color based on isNightMode
-                                padding: EdgeInsets.symmetric(vertical: 10),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  isNightMode ? Colors.blue : Colors.grey[500],
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30.0),
                               ),
-                              onPressed: () {
-                                setState(() {
-                                  handButtonPressed = false;
-                                  isNightMode = true;
-                                  isVacationMode = false;
-                                  daymode = false; // Deactivate AUTO mode
-                                });
-                                sendVacationModeToDatabase(handButtonPressed);
-                                sendTemperatureConsigneToDatabase(16);
-                              },
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 10),
+                              textStyle: TextStyle(
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                           SizedBox(width: 20),
-                          SizedBox(
-                            width: 160,
-                            height: 90,
-                            child: ElevatedButton(
-                              child: Text('Vacation Mode',
-                                  style: TextStyle(fontSize: 18)),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: handButtonPressed
-                                    ? Colors.green
-                                    : Colors.grey,
-                                padding: EdgeInsets.symmetric(vertical: 10),
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              setState(() {
+                                isVacationMode = !isVacationMode;
+                                daymode = false;
+                                isNightMode = false;
+                                sendVacationModeToDatabase(isVacationMode);
+                                updateModeText();
+                              });
+                            },
+                            icon: Icon(
+                              FontAwesomeIcons.suitcase,
+                              color: Colors.white,
+                            ),
+                            label: Text(
+                              'Vacation Mode',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
                               ),
-                              onPressed: () {
-                                setState(() {
-                                  handButtonPressed = !handButtonPressed;
-                                  isNightMode = false;
-                                  isVacationMode = handButtonPressed;
-                                  daymode = false; // Deactivate AUTO mode
-                                });
-                                sendVacationModeToDatabase(handButtonPressed);
-                              },
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: isVacationMode
+                                  ? Colors.blue
+                                  : Colors.grey[500],
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30.0),
+                              ),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 10),
+                              textStyle: TextStyle(
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                         ],
@@ -625,37 +651,38 @@ class _ModeAutoState extends State<ModeAuto>
                       SizedBox(
                         height: 10,
                       ),
-                      SizedBox(
-                        width: 160,
-                        height: 90,
-                        child: ElevatedButton(
-                          child: Text(
-                            'Day Mode',
-                            style: TextStyle(fontSize: 18),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                daymode ? Colors.green : Colors.grey,
-                            padding: EdgeInsets.symmetric(vertical: 10),
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              daymode = true; // Activate day mode
-                              isNightMode = false; // Turn off night mode
-                              isVacationMode = false; // Turn off vacation mode
-
-                              // Update button colors
-                              handButtonPressed =
-                                  false; // Turn off vacation mode button
-                              isNightMode = false; // Turn off night mode button
-                            });
-                            // Update database
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            daymode = !daymode;
+                            isVacationMode = false;
+                            isNightMode = false;
                             sendDayModeToDatabase(daymode);
-                            sendVacationModeToDatabase(
-                                false); // Turn off vacation mode in the database
-                            sendTemperatureConsigneToDatabase(
-                                19); // Set temperature consigne to 19
-                          },
+                            updateModeText();
+                          });
+                        },
+                        icon: Icon(
+                          FontAwesomeIcons.sun,
+                          color: Colors.white,
+                        ),
+                        label: Text(
+                          'Day Mode',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              daymode ? Colors.blue : Colors.grey[500],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30.0),
+                          ),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 10),
+                          textStyle: TextStyle(
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ],

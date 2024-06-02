@@ -1,40 +1,84 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:animated_text_kit/animated_text_kit.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_application_2/inside%20app/paramettre.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/material.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-class GraphPage extends StatelessWidget {
+class GraphPage extends StatefulWidget {
+  @override
+  _GraphPageState createState() => _GraphPageState();
+}
+
+class _GraphPageState extends State<GraphPage> {
+  final databaseReference = FirebaseDatabase.instance.reference();
+  List<SalesData> ambientTemperatureData = [];
+  List<SalesData> consigneTemperatureData = [];
+  late List<StreamSubscription> temperatureSubscriptions;
+  String currentMonth = 'Juin';
+
+  @override
+  void initState() {
+    super.initState();
+    temperatureSubscriptions = [];
+    fetchTemperatureData();
+  }
+
+  @override
+  void dispose() {
+    for (var subscription in temperatureSubscriptions) {
+      subscription.cancel();
+    }
+    super.dispose();
+  }
+
+  void fetchTemperatureData() {
+    List<String> days = List.generate(30, (index) => (index + 1).toString());
+
+    for (String day in days) {
+      StreamSubscription ambientSubscription = databaseReference
+          .child('project/temperatures/$day/temperature_ambainte')
+          .onValue
+          .listen((event) {
+        final dynamic value = event.snapshot.value;
+        if (value != null) {
+          setState(() {
+            ambientTemperatureData.add(SalesData(day, value.toDouble()));
+          });
+        } else {
+          print('Invalid data from the database for day $day');
+        }
+      });
+
+      StreamSubscription consigneSubscription = databaseReference
+          .child('project/temperatures/$day/temperature_consigne')
+          .onValue
+          .listen((event) {
+        final dynamic value = event.snapshot.value;
+        if (value != null) {
+          setState(() {
+            consigneTemperatureData.add(SalesData(day, value.toDouble()));
+          });
+        } else {
+          print('Invalid data from the database for day $day');
+        }
+      });
+
+      temperatureSubscriptions.add(ambientSubscription);
+      temperatureSubscriptions.add(consigneSubscription);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
-    bool is_dark_mode = parametter.getDarkMode();
-
-    // Sample data for the first series
-    List<SalesData> chartData1 = [
-      SalesData('Jan', 37),
-      SalesData('Feb', 28),
-      SalesData('Mar', 34),
-      SalesData('Apr', 32),
-      SalesData('May', 40),
-      SalesData('Jun', 45),
-    ];
-
-    // Sample data for the second series
-    List<SalesData> chartData2 = [
-      SalesData('Jan', 20),
-      SalesData('Feb', 30),
-      SalesData('Mar', 25),
-      SalesData('Apr', 40),
-      SalesData('May', 35),
-      SalesData('Jun', 45),
-    ];
+    bool isDarkMode = false; // Replace with your dark mode condition
 
     return WillPopScope(
       onWillPop: () async => false,
       child: Scaffold(
-        backgroundColor: is_dark_mode ? Colors.grey.shade900 : Colors.white,
+        backgroundColor: isDarkMode ? Colors.grey.shade900 : Colors.white,
         body: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             return SingleChildScrollView(
@@ -55,7 +99,7 @@ class GraphPage extends StatelessWidget {
                             child: DefaultTextStyle(
                               style: GoogleFonts.indieFlower(
                                 textStyle: TextStyle(
-                                  color: is_dark_mode
+                                  color: isDarkMode
                                       ? Colors.white
                                       : Colors.black.withOpacity(0.5),
                                   fontWeight: FontWeight.w300,
@@ -65,7 +109,7 @@ class GraphPage extends StatelessWidget {
                               child: AnimatedTextKit(
                                 animatedTexts: [
                                   TypewriterAnimatedText(
-                                    'Graph page',
+                                    'Graph Page - $currentMonth',
                                     speed: Duration(milliseconds: 200),
                                   ),
                                 ],
@@ -80,7 +124,7 @@ class GraphPage extends StatelessWidget {
                       SfCartesianChart(
                         primaryXAxis: CategoryAxis(
                           labelStyle: TextStyle(
-                            color: is_dark_mode
+                            color: isDarkMode
                                 ? Colors.white
                                 : Colors
                                     .black, // Adjust color based on dark mode
@@ -88,33 +132,34 @@ class GraphPage extends StatelessWidget {
                         ),
                         primaryYAxis: NumericAxis(
                           labelStyle: TextStyle(
-                            color: is_dark_mode
+                            color: isDarkMode
                                 ? Colors.white
                                 : Colors
                                     .black, // Adjust color based on dark mode
                           ),
                         ),
                         legend: Legend(
-                            isVisible: true, // Show the legend
-                            position: LegendPosition
-                                .bottom), // Position the legend at the bottom
+                          isVisible: true, // Show the legend
+                          position: LegendPosition
+                              .bottom, // Position the legend at the bottom
+                        ),
                         series: [
-                          // First line series
+                          // Ambient temperature line series
                           LineSeries<SalesData, String>(
-                            dataSource: chartData1,
-                            xValueMapper: (SalesData sales, _) => sales.year,
-                            yValueMapper: (SalesData sales, _) => sales.sales,
-                            name:
-                                'Set temperature', // Name for the first series
+                            dataSource: ambientTemperatureData,
+                            xValueMapper: (SalesData data, _) => data.day,
+                            yValueMapper: (SalesData data, _) =>
+                                data.temperature,
+                            name: 'Ambient Temperature',
                           ),
-                          // Second line series in red
+                          // Consigne temperature line series
                           LineSeries<SalesData, String>(
-                            dataSource: chartData2,
-                            xValueMapper: (SalesData sales, _) => sales.year,
-                            yValueMapper: (SalesData sales, _) => sales.sales,
+                            dataSource: consigneTemperatureData,
+                            xValueMapper: (SalesData data, _) => data.day,
+                            yValueMapper: (SalesData data, _) =>
+                                data.temperature,
+                            name: 'Consigne Temperature',
                             color: Colors.red, // Set the color to red
-                            name:
-                                'Ambient temperature', // Name for the second series
                           ),
                         ],
                       ),
@@ -131,7 +176,7 @@ class GraphPage extends StatelessWidget {
 }
 
 class SalesData {
-  SalesData(this.year, this.sales);
-  final String year;
-  final double sales;
+  SalesData(this.day, this.temperature);
+  final String day;
+  final double temperature;
 }
