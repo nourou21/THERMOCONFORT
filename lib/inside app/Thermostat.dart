@@ -124,11 +124,9 @@ class _ThermostatPageState extends State<ThermostatPage>
       }
     });
   }
-
-  void sendTemperatureToDatabase(int temperature) {
+    void sendTemperatureToDatabase(int temperature) {
     databaseReference.child('project/temperature consigne').set(temperature);
   }
-
   void listenToTemperatureConsigne() {
     databaseReference
         .child('project/temperature consigne')
@@ -139,7 +137,7 @@ class _ThermostatPageState extends State<ThermostatPage>
         setState(() {
           temperature = value.toInt();
         });
-
+        
         // Save temperature for the current day
         saveTemperatureForCurrentDay(readTemp, temperature);
       } else {
@@ -147,6 +145,8 @@ class _ThermostatPageState extends State<ThermostatPage>
       }
     });
   }
+
+  
 
   void incrementTemperature() {
     setState(() {

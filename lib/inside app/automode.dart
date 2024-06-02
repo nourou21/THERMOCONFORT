@@ -43,6 +43,7 @@ class _ModeAutoState extends State<ModeAuto>
   bool isLongDelaySelected = false;
   String thermoscctatNamez = "";
   String modeText = '';
+  
 
   Color backgroundColor = Colors.white;
 
@@ -522,7 +523,23 @@ class _ModeAutoState extends State<ModeAuto>
                                 ),
                                 Row(
                                   children: [
-                                    SizedBox(width: 136),
+                                    if (isVacationMode) ...[
+                                      Row(
+                                        children: [
+                                          SizedBox(
+                                            width: 10,
+                                          ),
+                                          Image.asset(
+                                            "assets/vacation.png",
+                                            width: 200,
+                                            height: 200,
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                    isVacationMode
+                                        ? SizedBox(width: 0)
+                                        : SizedBox(width: 136),
                                     Text(
                                       '$readTemp°C',
                                       style: TextStyle(

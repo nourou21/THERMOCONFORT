@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter_application_2/inside%20app/paramettre.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -16,6 +17,8 @@ class _GraphPageState extends State<GraphPage> {
   List<SalesData> ambientTemperatureData = [];
   List<SalesData> consigneTemperatureData = [];
   late List<StreamSubscription> temperatureSubscriptions;
+  bool is_dark_mode = parametter.getDarkMode();
+
   String currentMonth = 'Juin';
 
   @override
@@ -73,12 +76,11 @@ class _GraphPageState extends State<GraphPage> {
   @override
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
-    bool isDarkMode = false; // Replace with your dark mode condition
 
     return WillPopScope(
       onWillPop: () async => false,
       child: Scaffold(
-        backgroundColor: isDarkMode ? Colors.grey.shade900 : Colors.white,
+        backgroundColor: is_dark_mode ? Colors.grey.shade900 : Colors.white,
         body: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             return SingleChildScrollView(
@@ -99,7 +101,7 @@ class _GraphPageState extends State<GraphPage> {
                             child: DefaultTextStyle(
                               style: GoogleFonts.indieFlower(
                                 textStyle: TextStyle(
-                                  color: isDarkMode
+                                  color: is_dark_mode
                                       ? Colors.white
                                       : Colors.black.withOpacity(0.5),
                                   fontWeight: FontWeight.w300,
@@ -124,7 +126,7 @@ class _GraphPageState extends State<GraphPage> {
                       SfCartesianChart(
                         primaryXAxis: CategoryAxis(
                           labelStyle: TextStyle(
-                            color: isDarkMode
+                            color: is_dark_mode
                                 ? Colors.white
                                 : Colors
                                     .black, // Adjust color based on dark mode
@@ -132,7 +134,7 @@ class _GraphPageState extends State<GraphPage> {
                         ),
                         primaryYAxis: NumericAxis(
                           labelStyle: TextStyle(
-                            color: isDarkMode
+                            color: is_dark_mode
                                 ? Colors.white
                                 : Colors
                                     .black, // Adjust color based on dark mode
